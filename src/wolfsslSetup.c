@@ -113,24 +113,8 @@ int wolfsslSetup(int argc, char** argv, char action)
             }
 
             else if (strcmp(argv[i], "-i") == 0 && argv[i+1] != NULL) {
-                /* input file/text */
-                    int inputLength = strlen(argv[i+1]);
-                    char inputString[inputLength];
-                    strcpy(inputString, argv[i+1]);
-                    ret = wolfsslHexToBin(inputString, &in, &numBits,
-                                            NULL, NULL, NULL,
-                                            NULL, NULL, NULL,
-                                            NULL, NULL, NULL);
-                     if (ret != 0) {
-                        printf("failed during conversion, ret = %d\n", ret);
-                        return -1;
-                    }
-                    printf("\nKEY after set.\n");
-                    for (tempi = 0; tempi < (int)numBits; tempi++) {
-                        printf("%02x", in[tempi]);
-                    }
-                    printf("\n");
-                // in = argv[i+1];
+                 /* input file/text */
+                in = argv[i+1];
                 inCheck = 1;
                 /* continue while out check not equal 1 */
                 i+=2;
