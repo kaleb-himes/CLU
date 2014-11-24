@@ -213,7 +213,7 @@ int wolfsslSetup(int argc, char** argv, char action)
                 i++; continue;
             }
 
-        }while(outCheck == 0);
+        }while(i < 15);
 
         if (inCheck == 0 && eCheck == 1) {
             in = inName;
