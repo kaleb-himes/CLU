@@ -103,7 +103,6 @@ int wolfsslDecrypt(char* alg, char* mode, byte* pwdKey, byte* key, int size,
             }
 
             /* replicates old pwdKey if pwdKeys match */
-            printf("keyType is: %d.\n", keyType);
             if (keyType == 1) {
                 if (PBKDF2(key, pwdKey, strlen((const char*)pwdKey), salt, 
                             SALT_SIZE, 4096, size, SHA256) != 0) {

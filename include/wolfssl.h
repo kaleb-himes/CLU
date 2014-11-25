@@ -113,7 +113,7 @@ void wolfsslStats(double start, int blockSize);
 /* encryption function */
 int wolfsslEncrypt(char* alg, char* mode, byte* pwdKey, byte* key, int size, 
 								char* in, char* out, byte* iv, int block, 
-                                int ivCheck);
+                                int ivCheck, int inputHex);
 
 /* decryption function */
 int wolfsslDecrypt(char* alg, char* mode, byte* pwdKey, byte* key, int size, 

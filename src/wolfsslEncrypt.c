@@ -24,7 +24,7 @@
 #define MAX             1024
 
 int wolfsslEncrypt(char* alg, char* mode, byte* pwdKey, byte* key, int size, 
-        char* in, char* out, byte* iv, int block, int ivCheck)
+        char* in, char* out, byte* iv, int block, int ivCheck, int inputHex)
 {
 #ifndef NO_AES
     Aes aes;                        /* aes declaration */
@@ -44,17 +44,22 @@ int wolfsslEncrypt(char* alg, char* mode, byte* pwdKey, byte* key, int size,
 
     RNG     rng;                    /* random number generator declaration */
     byte*   input = NULL;           /* input buffer */
-    byte*   userInputBuffer = NULL; /* buffer for not a file */
     byte*   output = NULL;          /* output buffer */
     byte    salt[SALT_SIZE] = {0};  /* salt variable */
+    char*   userInputBuffer = NULL; /* buffer for not a file */
 
     int     ret             = 0;    /* return variable */
     int     inputLength     = 0;    /* length of input */
     int     length          = 0;    /* total length */
     int     padCounter      = 0;    /* number of padded bytes */
     int     i               = 0;    /* loop variable */
-    int     tempi           = 0;
+    int     convertRet      = 0;
+    int     did_conversion  = 0;
     word32  tempMax         = MAX;  /* equal to max until padding */
+    word32  tempInputL      = 0;
+    char    inputString[MAX];
+    char    dfault_fname[14] = "converting.txt";
+    char*   dfault_file = dfault_fname;
 
 
     if (access (in, F_OK) == -1) {
@@ -62,22 +67,26 @@ int wolfsslEncrypt(char* alg, char* mode, byte* pwdKey, byte* key, int size,
                 "instead.\n");
         /* use user entered data to encrypt */
         inputLength = strlen(in);
-        userInputBuffer = (byte*) malloc(inputLength);
+        userInputBuffer = (char*) malloc(inputLength);
 
         /* writes the entered text to the input buffer */
         memcpy(userInputBuffer, in, inputLength);
-
         /* open the file to write */
-        tempInFile = fopen(in, "wb");
+        tempInFile = fopen(dfault_file, "wb");
         fwrite(userInputBuffer, 1, inputLength, tempInFile);
         fclose(tempInFile);
 
         /* free buffer */
         free(userInputBuffer);
+        did_conversion = 1;
     }
 
     /* open the inFile in read mode */
-    inFile = fopen(in, "rb");  
+    if (did_conversion == 0)
+        inFile = fopen(in, "rb");
+    else
+        inFile = fopen(dfault_file, "rb");
+     
 
     /* find length */
     fseek(inFile, 0, SEEK_END);
@@ -130,13 +139,6 @@ int wolfsslEncrypt(char* alg, char* mode, byte* pwdKey, byte* key, int size,
     /* open the outFile in write mode */
     outFile = fopen(out, "wb");
     fwrite(salt, 1, SALT_SIZE, outFile);
-    if (iv != NULL ) {
-        printf("\nIV as printed to file.\n");
-        for (tempi = 0; tempi < block; tempi++) {
-            printf("%02x", iv[tempi]);
-        }
-    }
-    printf("\n");
     fwrite(iv, 1, block, outFile);
     fclose(outFile);
 
@@ -147,25 +149,41 @@ int wolfsslEncrypt(char* alg, char* mode, byte* pwdKey, byte* key, int size,
     /* loop, encrypt 1kB at a time till length <= 0 */
     while (length > 0) {
         /* Read in 1kB to input[] */
-        ret = fread(input, 1, MAX, inFile);
-        if (ret != MAX) { /* we may have reached end of file */
-            if (feof(inFile)) {
+        if (inputHex == 1)
+            ret = fread(inputString, 1, MAX, inFile);
+        else
+            ret = fread(input, 1, MAX, inFile);
+        if (ret != MAX) {           /* ret != MAX on fread */
+
+            if (feof(inFile)) {     /* we may have reached end of file */
+
+                if (inputHex == 1) {/* check if we are using hex or ascii */
+                    convertRet = wolfsslHexToBin(inputString, &input, 
+                                                &tempInputL,
+                                                NULL, NULL, NULL,
+                                                NULL, NULL, NULL,
+                                                NULL, NULL, NULL);
+                     if (convertRet != 0) {
+                        printf("failed during conversion of input,"
+                            " ret = %d\n", convertRet);
+                        return -1;
+                    }
+                }/* end Hex or Ascii check */
 
                 printf("End of file reached, padding...\n");
                 /* pad to end of block */
                 for (i = ret ; i < (ret + padCounter); i++) {
-                    printf("padd %d.\n", i);
                     input[i] = padCounter;
                 }
-
                 /* adjust tempMax for less than 1kB encryption */
                 tempMax = ret + padCounter;
             } 
             else { /* otherwise we got a file read error */
                 wolfsslFreeBins(input, output, NULL, NULL, NULL);
                 return FREAD_ERROR;
-            }
-        }
+            }/* End feof check */
+        }/* End ret != MAX check */
+
         /* encrypt input[] to output[] and write to outFile */
 
         /* sets key encrypts the message to ouput from input length + padding */
@@ -178,18 +196,6 @@ int wolfsslEncrypt(char* alg, char* mode, byte* pwdKey, byte* key, int size,
                     wolfsslFreeBins(input, output, NULL, NULL, NULL);
                     return ret;
                 }
-                  if (iv != NULL ) {
-            printf("\nIV before AesCbcEncrypt.\n");
-            for (tempi = 0; tempi < block; tempi++) {
-                printf("%02x", iv[tempi]);
-            }
-        }
-        if (key != NULL) {
-            printf("\nkey before AesCbcEncrypt.\n");
-            for (tempi = 0; tempi < 128/8; tempi++) {
-                printf("%02x", key[tempi]);
-            }
-        }
                 ret = AesCbcEncrypt(&aes, output, input, tempMax);
                 if (ret != 0) {
                     printf("AesCbcEncrypt failed.\n");
@@ -239,28 +245,17 @@ int wolfsslEncrypt(char* alg, char* mode, byte* pwdKey, byte* key, int size,
                 return FATAL_ERROR;
             }
         }
-#endif /* HAVE_CAMELLIA */
-
-        
-        if (iv != NULL ) {
-            printf("\nIV before print.\n");
-            for (tempi = 0; tempi < block; tempi++) {
-                printf("%02x", iv[tempi]);
-            }
-        }
-        if (key != NULL) {
-            printf("\nkey before print.\n");
-            for (tempi = 0; tempi < 128/8; tempi++) {
-                printf("%02x", key[tempi]);
-            }
-        }
-        if (output != NULL) {
-            printf("\noutput buffer has: \n");
+#endif /* HAVE_CAMELLIA */      
+        if (output != NULL && inputHex == 1) {
+            int tempi;
+            printf("\nUser specified hex input this is a representation of what\n"
+                "is being written to file in hex form.\n\n[ ");
             for (tempi = 0; tempi < block; tempi++ ) {
                 printf("%02x", output[tempi]);
             }
+            printf(" ]\n\n");
         }
-        printf("\n");
+        
 
         outFile = fopen(out, "ab");
       
@@ -274,29 +269,29 @@ int wolfsslEncrypt(char* alg, char* mode, byte* pwdKey, byte* key, int size,
         length -= tempMax;
         if (length < 0)
             printf("length went past zero.\n");
-        printf("1\n");
         if (input != NULL)
             memset(input, 0, tempMax); 
-        printf("2\n");
         if (output != NULL)
             memset(output, 0, tempMax);
     }
 
     /* closes the opened files and frees the memory */
-    printf("3\n");
-    fclose(inFile);
-    printf("4\n");
-    wolfsslFreeBins(input, output, NULL, NULL, NULL);
-    printf("5\n");
+    //printf("1\n");
+    if (inputHex == 0)
+        fclose(inFile);
+    //printf("2\n");
+    if (input != NULL && output != NULL)
+        wolfsslFreeBins(input, output, NULL, NULL, NULL);
+    //printf("3\n");
     if (key != NULL)
         memset(key, 0, size);
-    printf("6\n");  
+    //printf("4\n");  
     if (iv != NULL)
         memset(iv, 0 , block);
-    printf("7\n");  
+    //printf("5\n");  
     memset(alg, 0, size);
-    printf("8\n");
+    //printf("6\n");
     memset(mode, 0 , block);
-    printf("9\n");
+    //printf("7\n");
     return 0;
 }

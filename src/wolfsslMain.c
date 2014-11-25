@@ -52,7 +52,7 @@ int main(int argc, char** argv)
     int ret = 0;
     int option;
 
-    while ((option = getopt (argc, argv, "e:d:h:b:i:o:p:V:K:l:t:")) != -1)  { 
+    while ((option = getopt (argc, argv, "e:d:h:b:i:o:p:V:K:l:t:x")) != -1)  { 
         switch (option) 
         {
             /* User wants to encrypt data or file*/ 
@@ -84,11 +84,14 @@ int main(int argc, char** argv)
                 break;
             case 't':/* will be handled by benchSetup function */
                 break;
+            case 'x':/* will be handled by benchSetup function*/
+                break;
 
             default:
                 help();
         }
     }
-    // ret = testHexToBin();
+    if (ret != 0)
+        printf("Error returned: %d.\n", ret);
     return ret;
 }

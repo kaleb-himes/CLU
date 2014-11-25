@@ -31,8 +31,8 @@ int wolfsslSetup(int argc, char** argv, char action)
     char*    name = NULL;       /* string of algorithm, mode, keysize */
     char*    alg = NULL;        /* algorithm from name */
     char*    mode = NULL;       /* mode from name */
-    char*    in = inName;       /* default in data */
     char*    out = outNameE;    /* default output file name */
+    char*    in = inName;       /* default in data */
     byte*    pwdKey = NULL;     /* password for generating pwdKey */
     byte*    key = NULL;        /* user set key NOT PWDBASED */
     byte*    iv = NULL;         /* iv for initial encryption */
@@ -46,14 +46,14 @@ int wolfsslSetup(int argc, char** argv, char action)
     int      keyCheck   =   0;  /* if ivCheck is 1 this should be set also */
     int      inCheck    =   0;  /* if input has been provided */
     int      outCheck   =   0;  /* if output has been provided */
-    int      mark       =   0;  /* used for getting file extension of in */
-    
+    int      mark       =   0;  /* used for getting file extension of in */  
     int      i          =   0;  /* loop counter */
     int      eCheck     =   0;  /* if user is encrypting data */
     int      dCheck     =   0;  /* if user is decrypting data */
-
+    int      inputHex   =   0;  /* if user is encrypting hexidecimal stuff */
     int      keyType    =   0;  /* tells Decrypt which key it will be using 
-                                 * 1 = password based key, 2 = user set key */
+                                 * 1 = password based key, 2 = user set key 
+                                 */
     int      tempi      =   0;
     word32   ivSize     =   0;  /* IV if provided should be 2*block */
     word32   numBits    =   0;  /* number of bits in argument from the user */
@@ -91,18 +91,6 @@ int wolfsslSetup(int argc, char** argv, char action)
             if (argv[i] == NULL){
                 break;
             }
-
-            /* should never get this high but if it does, something went
-             * wrong, break out of loop
-             */
-            else if (i > 13) {
-                /* The most flags that should ever be turned on is -i, -o, -V, -K -p, 
-                 * (-e xor -d xor -h xor -b) and the program itself for a total of: 
-                 * 5*2 = 10 + 2 + 1 = 13 so we'll allow this to search up to 13 then
-                 * break after that 
-                 */
-                break;
-            }
             else if (strcmp(argv[i], "-o") == 0 && argv[i+1] != NULL) {
                 /* output file */
                 out = argv[i+1];
@@ -130,6 +118,13 @@ int wolfsslSetup(int argc, char** argv, char action)
                 continue;
                  
             }
+            else if (strcmp(argv[i], "-x") == 0) {
+                /* using hexidecimal format */
+                inputHex = 1;
+                i++;
+                continue;
+                 
+            }
             else if (strcmp(argv[i], "-V") == 0 && argv[i+1] != NULL) {
                 /* iv for encryption */
                 if (pwdKeyCheck == 1) {
@@ -146,11 +141,6 @@ int wolfsslSetup(int argc, char** argv, char action)
                     return FATAL_ERROR;                    
                 }
                 else {
-                    printf("\nIV before set.\n");
-                    for (tempi = 0; tempi < block; tempi++) {
-                        printf("%02x", iv[tempi]);
-                    }
-                    printf("\n");
                     char ivString[strlen(argv[i+1])];
                     strcpy(ivString, argv[i+1]);
                     ret = wolfsslHexToBin(ivString, &iv, &ivSize,
@@ -158,15 +148,9 @@ int wolfsslSetup(int argc, char** argv, char action)
                                             NULL, NULL, NULL,
                                             NULL, NULL, NULL);
                     if (ret != 0) {
-                        printf("failed during conversion, ret = %d\n", ret);
+                        printf("failed during conversion of IV, ret = %d\n", ret);
                         return -1;
                     }
-
-                    printf("\nIV after set.\n");
-                    for (tempi = 0; tempi < block; tempi++) {
-                        printf("%02x", iv[tempi]);
-                    }
-                    printf("\n");
                     ivCheck = 1;
                     i+=2;
                     continue;
@@ -194,15 +178,9 @@ int wolfsslSetup(int argc, char** argv, char action)
                                             NULL, NULL, NULL,
                                             NULL, NULL, NULL);
                      if (ret != 0) {
-                        printf("failed during conversion, ret = %d\n", ret);
+                        printf("failed during conversion of Key, ret = %d\n", ret);
                         return -1;
                     }
-                    printf("\nKEY after set.\n");
-                    for (tempi = 0; tempi < (int)numBits; tempi++) {
-                        printf("%02x", key[tempi]);
-                    }
-                    printf("\n");
-
                     keyCheck = 1;
                     keyType = 2;
                     i+=2;
@@ -276,7 +254,7 @@ int wolfsslSetup(int argc, char** argv, char action)
                 }
             }
             ret = wolfsslEncrypt(alg, mode, pwdKey, key, size, in, out, 
-                    iv, block, ivCheck);
+                    iv, block, ivCheck, inputHex);
         }
         /* decryption function call */
         else if (dCheck == 1) {
@@ -299,20 +277,14 @@ int wolfsslSetup(int argc, char** argv, char action)
         else {
             wolfsslHelp("-e");
              /* clear and free data */
-            printf("10\n");
             memset(key, 0, size);
-            printf("11\n");
             memset(pwdKey, 0, size);
-            printf("12\n");
             memset(iv, 0, block);
-            printf("13\n");
             wolfsslFreeBins(pwdKey, iv, key, NULL, NULL);
-            printf("14\n");
         }
        
     }
     else
         ret = FATAL_ERROR;
-    printf("15\n");
     return ret;
 }

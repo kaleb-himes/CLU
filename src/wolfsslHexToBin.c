@@ -44,7 +44,7 @@
 /* free up to 5 binary buffers using cyassl abstraction layer */
 void wolfsslFreeBins(byte* b1, byte* b2, byte* b3, byte* b4, byte* b5)
 {
-    printf("Freeing stuff...");
+    printf("Freeing stuff...\n");
    XFREE(b1, NULL, DYNAMIC_TYPE_TMP_BUFFER); 
    XFREE(b2, NULL, DYNAMIC_TYPE_TMP_BUFFER); 
    XFREE(b3, NULL, DYNAMIC_TYPE_TMP_BUFFER); 
