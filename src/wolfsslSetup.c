@@ -54,7 +54,6 @@ int wolfsslSetup(int argc, char** argv, char action)
     int      keyType    =   0;  /* tells Decrypt which key it will be using 
                                  * 1 = password based key, 2 = user set key 
                                  */
-    int      tempi      =   0;
     word32   ivSize     =   0;  /* IV if provided should be 2*block */
     word32   numBits    =   0;  /* number of bits in argument from the user */
 
