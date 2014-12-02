@@ -52,8 +52,8 @@ int wolfsslDecrypt(char* alg, char* mode, byte* pwdKey, byte* key, int size,
     int     length;                 /* length of message */
     int     sbSize = SALT_SIZE + block; /* size of salt and iv together */
     int     tempMax = MAX;          /* equal to MAX until feof */
-    int     keyVerify = 0;
-    int     i          =   0;       /* loop variable */
+    int     keyVerify   = 0;        /* verify the key is set */
+    int     i           = 0;        /* loop variable */
 
     /* opens input file */
     inFile = fopen(in, "rb");
@@ -74,6 +74,7 @@ int wolfsslDecrypt(char* alg, char* mode, byte* pwdKey, byte* key, int size,
     /* set length = file length - salt and iv */
     fseek(inFile, 0, SEEK_SET);
 
+    /* if there is a remainder, round up else no round */
     if (length % MAX > 0) {
         lastLoopFlag = (length/MAX) + 1;
     }
@@ -96,12 +97,12 @@ int wolfsslDecrypt(char* alg, char* mode, byte* pwdKey, byte* key, int size,
                 wolfsslFreeBins(input, output, NULL, NULL, NULL);
                 return FREAD_ERROR;
             }
+
             if ( (int) fread (iv, 1, block, inFile) != block) {
                 printf("Error reading salt.\n");
                 wolfsslFreeBins(input, output, NULL, NULL, NULL);
                 return FREAD_ERROR;
-            }
-
+            } 
             /* replicates old pwdKey if pwdKeys match */
             if (keyType == 1) {
                 if (PBKDF2(key, pwdKey, strlen((const char*)pwdKey), salt, 
@@ -110,10 +111,6 @@ int wolfsslDecrypt(char* alg, char* mode, byte* pwdKey, byte* key, int size,
                     wolfsslFreeBins(input, output, NULL, NULL, NULL);
                     return ENCRYPT_ERROR;
                 }
-                // for(i = 0; i < size; i++) {
-                    // printf(" %d,", key[i]);
-                // }
-                // printf("\n");
             }
             else if (keyType == 2) {
                 for (i = 0; i < size; i++) {
@@ -202,7 +199,7 @@ int wolfsslDecrypt(char* alg, char* mode, byte* pwdKey, byte* key, int size,
             CamelliaCbcDecrypt(&camellia, output, input, tempMax);
         }
 #endif
-        if (currLoopFlag >= lastLoopFlag) {
+        if (currLoopFlag == lastLoopFlag) {
             if (salt[0] != 0) {
                 /* reduces length based on number of padded elements  */
                 int pad = output[tempMax-1];
@@ -211,11 +208,15 @@ int wolfsslDecrypt(char* alg, char* mode, byte* pwdKey, byte* key, int size,
                 /* reset tempMax for smaller decryption */
                 fwrite(output, 1, length, outFile);
                 break;
-            } else {
-                fprintf(stderr, "Infinite loop fail-safe activated.\n");
-                return FATAL_ERROR;
             }
-        }
+            else {
+                fwrite(output, 1, tempMax, outFile);
+
+                memset(input, 0, tempMax);
+                memset(output, 0, tempMax);
+                break;
+            }
+        } 
         /* writes output to the outFile based on shortened length */
         fwrite(output, 1, tempMax, outFile);
 

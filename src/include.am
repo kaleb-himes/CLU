@@ -4,21 +4,27 @@
 
 #/ kaleb /#
 bin_PROGRAMS = wolfssl
-wolfssl_SOURCES = src/wolfssl.c \
+wolfssl_SOURCES = src/wolfsslFuncs.c \
 					src/wolfsslEncrypt.c \
 					src/wolfsslDecrypt.c \
+					src/wolfsslHash.c \
 					src/wolfsslBenchmark.c \
 					src/wolfsslSetup.c \
+					src/wolfsslHashSetup.c \
+					src/wolfsslBenchSetup.c \
 					src/wolfsslHexToBin.c \
 					src/wolfsslMain.c \
 					include/wolfssl.h
 
 lib_LTLIBRARIES+=  src/libwolfssl.la
-src_libwolfssl_la_SOURCES = src/wolfssl.c \
+src_libwolfssl_la_SOURCES = src/wolfsslFuncs.c \
 							src/wolfsslEncrypt.c \
 							src/wolfsslDecrypt.c \
+							src/wolfsslHash.c \
 							src/wolfsslBenchmark.c \
 							src/wolfsslSetup.c \
+							src/wolfsslHashSetup.c \
+							src/wolfsslBenchSetup.c \
 							src/wolfsslHexToBin.c \
                             src/wolfsslMain.c \
 							include/wolfssl.h

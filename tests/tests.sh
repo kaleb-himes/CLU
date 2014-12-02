@@ -63,10 +63,10 @@ function hashing() {
         RANDT=$(cat /dev/urandom | tr -dc 'a-zA-Z0-9' | fold -w $SIZET | head -n 1)
         echo $RANDF >> $IN
  
-        echo $WOLFSSL hash $1 size: $SIZEF bytes
-        $WOLFSSL hash $1 -i $IN -o $OUT
-        echo $WOLFSSL hash $1 -i $RANDT
-        $WOLFSSL hash $1 -i $RANDT -o $OUT
+        echo $WOLFSSL -h $1 size: $SIZEF bytes
+        $WOLFSSL -h $1 -i $IN -o $OUT
+        echo $WOLFSSL -h $1 -i $RANDT
+        $WOLFSSL -h $1 -i $RANDT -o $OUT
 
         rm -f $IN
         rm -f $OUT
@@ -110,4 +110,7 @@ fi
 grep -q "HAVE_BLAKE2" $OPTS && if [[ $? -eq $zero ]]; then
     hashing $BLAKE
 fi
-$WOLFSSL benchmark -t 1 -all
+$WOLFSSL -b -t 1 -all
+
+rm enc.txt
+rm converting.txt

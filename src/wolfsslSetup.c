@@ -127,14 +127,16 @@ int wolfsslSetup(int argc, char** argv, char action)
             else if (strcmp(argv[i], "-V") == 0 && argv[i+1] != NULL) {
                 /* iv for encryption */
                 if (pwdKeyCheck == 1) {
-                    printf("Invalid option, attempting to use IV with password based key.");
+                    printf("Invalid option, attempting to use IV with password"
+                           " based key.");
                     wolfsslFreeBins(pwdKey, iv, key, NULL, NULL);
                     return FATAL_ERROR;
                 }
                  ivSize = block*2;
                 if (strlen(argv[i+1]) != ivSize) {
                     printf("Invalid IV. Must match algorithm block size.\n");
-                    printf("Invalid IV size was: %d.\n", (int) strlen(argv[i+1]));
+                    printf("Invalid IV size was: %d.\n", 
+                                                       (int) strlen(argv[i+1]));
                     printf("size of IV expected was: %d.\n", ivSize);
                     wolfsslFreeBins(pwdKey, iv, key, NULL, NULL);
                     return FATAL_ERROR;                    
@@ -147,7 +149,8 @@ int wolfsslSetup(int argc, char** argv, char action)
                                             NULL, NULL, NULL,
                                             NULL, NULL, NULL);
                     if (ret != 0) {
-                        printf("failed during conversion of IV, ret = %d\n", ret);
+                        printf("failed during conversion of IV, ret = %d\n", 
+                                                                           ret);
                         return -1;
                     }
                     ivCheck = 1;
@@ -177,7 +180,8 @@ int wolfsslSetup(int argc, char** argv, char action)
                                             NULL, NULL, NULL,
                                             NULL, NULL, NULL);
                      if (ret != 0) {
-                        printf("failed during conversion of Key, ret = %d\n", ret);
+                        printf("failed during conversion of Key, ret = %d\n", 
+                                                                           ret);
                         return -1;
                     }
                     keyCheck = 1;

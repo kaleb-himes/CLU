@@ -1,4 +1,5 @@
-/*
+/* wolfsslHexToBin.c
+ *
  * Copyright (C) 2006-2014 wolfSSL Inc.
  *
  * This file is part of CyaSSL.
@@ -21,7 +22,6 @@
  * to Base16_Decode() function.
  *
  * Compile this example using:
- * gcc hextobinExample.c -lcyassl
  *
  */
 
@@ -31,15 +31,6 @@
 #include <cyassl/ctaocrypt/error-crypt.h>
 #include <stdio.h>
 #include <include/wolfssl.h>
-
-/* prototypes */
-// void FreeBins(byte* b1, byte* b2, byte* b3, byte* b4, byte* b5);
-// int ConvertHexToBin(const char* h1, byte** b1, word32* b1Sz,
-//                     const char* h2, byte** b2, word32* b2Sz,
-//                     const char* h3, byte** b3, word32* b3Sz,
-//                     const char* h4, byte** b4, word32* b4Sz);
-
-// int testHexToBin(void);
 
 /* free up to 5 binary buffers using cyassl abstraction layer */
 void wolfsslFreeBins(byte* b1, byte* b2, byte* b3, byte* b4, byte* b5)
@@ -123,31 +114,3 @@ int wolfsslHexToBin(const char* h1, byte** b1, word32* b1Sz,
 
     return 0;
 }
-
-// int testHexToBin(void)
-// {
-//     int ret, i;
-
-//     char* mystring = "abcd";
-//     byte* mystringBin = NULL;
-//     word32 mystringBinSz = 0;
-
-//     ret = wolfsslHexToBin(mystring, &mystringBin, &mystringBinSz,
-//                           NULL, NULL, NULL,
-//                           NULL, NULL, NULL,
-//                           NULL, NULL, NULL);
-//     if (ret != 0) {
-//         printf("failed during conversion, ret = %d\n", ret);
-//         return -1;
-//     }
-
-//     /* output our converted byte array */
-//     printf("byte array = ");
-//     for (i = 0; i < mystringBinSz; i++)
-//         printf("%02x", mystringBin[i]);
-//     printf("\n");
-
-//     wolfsslFreeBins(mystringBin, NULL, NULL, NULL, NULL);
-
-//     return 0;
-// }

@@ -104,16 +104,16 @@ int wolfsslEncrypt(char* alg, char* mode, byte* pwdKey, byte* key, int size,
         padCounter++;
     }
 
-    /* Ensure 1kB is evenly divisible by block size */
-    if (MAX % block != 0) {
-        printf("Bad Block.\n"); /* This should never happen */
-        return ENCRYPT_ERROR;
-    }
-    if (length % block != 0) {
-        /* ensure blocks will evenly fit into file */
-        printf("Error with length mod block size.\n");
-        return -1;
-    }
+    // /* Ensure 1kB is evenly divisible by block size */
+    // if (MAX % block != 0) {
+    //     printf("Bad Block.\n"); /* This should never happen */
+    //     return ENCRYPT_ERROR;
+    // }
+    // if (length % block != 0) {
+    //     /* ensure blocks will evenly fit into file */
+    //     printf("Error with length mod block size.\n");
+    //     return -1;
+    // }
 
     /* if the iv was not explicitly set, generate an iv and use the pwdKey */
     if (ivCheck == 0) {
@@ -121,11 +121,13 @@ int wolfsslEncrypt(char* alg, char* mode, byte* pwdKey, byte* key, int size,
         printf("random IV being generated.\n");
         /* randomly generate iv if one has not been provided */
         ret = RNG_GenerateBlock(&rng, iv, block);
+
         if (ret != 0) {
             return ret;
         }
         /* stretches pwdKey to fit size based on wolfsslGetAlgo() */
         ret = wolfsslGenKey(&rng, pwdKey, size, salt, padCounter);
+
         if (ret != 0) {
             printf("failed to set pwdKey.\n");
             return ret;
@@ -248,15 +250,14 @@ int wolfsslEncrypt(char* alg, char* mode, byte* pwdKey, byte* key, int size,
 #endif /* HAVE_CAMELLIA */      
         if (output != NULL && inputHex == 1) {
             int tempi;
-            printf("\nUser specified hex input this is a representation of what\n"
-                "is being written to file in hex form.\n\n[ ");
+            printf("\nUser specified hex input this is a representation of "
+                "what\nis being written to file in hex form.\n\n[ ");
             for (tempi = 0; tempi < block; tempi++ ) {
                 printf("%02x", output[tempi]);
             }
             printf(" ]\n\n");
         }
         
-
         outFile = fopen(out, "ab");
       
         ret = fwrite(output, 1, tempMax, outFile);
