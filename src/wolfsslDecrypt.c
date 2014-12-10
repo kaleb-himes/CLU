@@ -27,33 +27,33 @@ int wolfsslDecrypt(char* alg, char* mode, byte* pwdKey, byte* key, int size,
         char* in, char* out, byte* iv, int block, int keyType)
 {
 #ifndef NO_AES
-    Aes aes;                        /* aes declaration */
+    Aes aes;                            /* aes declaration */
 #endif
 
 #ifndef NO_DES3
-    Des3 des3;                      /* 3des declaration */
+    Des3 des3;                          /* 3des declaration */
 #endif
 
 #ifdef HAVE_CAMELLIA
-    Camellia camellia;              /* camellia declaration */
+    Camellia camellia;                  /* camellia declaration */
 #endif
 
-    FILE*  inFile;                  /* input file */
-    FILE*  outFile;                 /* output file */
+    FILE*  inFile;                      /* input file */
+    FILE*  outFile;                     /* output file */
 
-    RNG     rng;                    /* random number generator */
-    byte*   input;                  /* input buffer */
-    byte*   output;                 /* output buffer */
-    byte    salt[SALT_SIZE] = {0};  /* salt variable */
+    RNG     rng;                        /* random number generator */
+    byte*   input;                      /* input buffer */
+    byte*   output;                     /* output buffer */
+    byte    salt[SALT_SIZE] = {0};      /* salt variable */
 
-    int     currLoopFlag = 1;       /* flag to track the loop */
-    int     lastLoopFlag = 0;       /* flag for last loop */
-    int     ret          = 0;       /* return variable */
-    int     length;                 /* length of message */
+    int     currLoopFlag = 1;           /* flag to track the loop */
+    int     lastLoopFlag = 0;           /* flag for last loop */
+    int     ret          = 0;           /* return variable */
+    int     length;                     /* length of message */
+    int     tempMax = MAX;              /* equal to MAX until feof */
+    int     keyVerify   = 0;            /* verify the key is set */
+    int     i           = 0;            /* loop variable */
     int     sbSize = SALT_SIZE + block; /* size of salt and iv together */
-    int     tempMax = MAX;          /* equal to MAX until feof */
-    int     keyVerify   = 0;        /* verify the key is set */
-    int     i           = 0;        /* loop variable */
 
     /* opens input file */
     inFile = fopen(in, "rb");
@@ -70,11 +70,12 @@ int wolfsslDecrypt(char* alg, char* mode, byte* pwdKey, byte* key, int size,
 
     /* find end of file for length */
     fseek(inFile, 0, SEEK_END);
-    length = ftell(inFile);
-    /* set length = file length - salt and iv */
+    length = (int) ftell(inFile);
     fseek(inFile, 0, SEEK_SET);
 
-    /* if there is a remainder, round up else no round */
+    /* if there is a remainder, 
+     * round up else no round 
+     */
     if (length % MAX > 0) {
         lastLoopFlag = (length/MAX) + 1;
     }
@@ -87,7 +88,9 @@ int wolfsslDecrypt(char* alg, char* mode, byte* pwdKey, byte* key, int size,
 
     InitRng(&rng);
 
-    /* reads from inFile and writes whatever is there to the input buffer */
+    /* reads from inFile and writes whatever
+     * is there to the input buffer 
+     */
     while ( length > 0 ) {
 
         /* On first loop only read in salt and iv */
@@ -105,7 +108,7 @@ int wolfsslDecrypt(char* alg, char* mode, byte* pwdKey, byte* key, int size,
             } 
             /* replicates old pwdKey if pwdKeys match */
             if (keyType == 1) {
-                if (PBKDF2(key, pwdKey, strlen((const char*)pwdKey), salt, 
+                if (PBKDF2(key, pwdKey, (int) strlen((const char*)pwdKey), salt, 
                             SALT_SIZE, 4096, size, SHA256) != 0) {
                     printf("pwdKey set error.\n");
                     wolfsslFreeBins(input, output, NULL, NULL, NULL);
@@ -114,7 +117,8 @@ int wolfsslDecrypt(char* alg, char* mode, byte* pwdKey, byte* key, int size,
             }
             else if (keyType == 2) {
                 for (i = 0; i < size; i++) {
-                    /* make sure the key is set already */
+
+                    /* ensure key is set */
                     if (key[i] == 0 || key[i] == '\0') {
                         continue;
                     }
@@ -129,6 +133,7 @@ int wolfsslDecrypt(char* alg, char* mode, byte* pwdKey, byte* key, int size,
                 } 
             }
         }
+
         /* Read in 1kB */
         if ((ret = (int) fread(input, 1, MAX, inFile)) != MAX) {
             if (feof(inFile)) {
@@ -217,7 +222,7 @@ int wolfsslDecrypt(char* alg, char* mode, byte* pwdKey, byte* key, int size,
                 break;
             }
         } 
-        /* writes output to the outFile based on shortened length */
+        /* writes output to the outFile */
         fwrite(output, 1, tempMax, outFile);
 
         memset(input, 0, tempMax);
@@ -226,11 +231,13 @@ int wolfsslDecrypt(char* alg, char* mode, byte* pwdKey, byte* key, int size,
         currLoopFlag++;
         length -= tempMax;
     }
-    /* closes the opened files and frees the memory */
+    /* closes the opened files and frees memory */
     memset(input, 0, MAX);
     memset (output, 0, MAX);
     wolfsslFreeBins(input, output, NULL, NULL, NULL);
     memset(key, 0, size);
+    /* Use the cyassl FreeRng to free rng */
+    FreeRng(&rng);
     fclose(inFile);
     fclose(outFile);
 

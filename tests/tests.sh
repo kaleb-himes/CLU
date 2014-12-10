@@ -1,6 +1,6 @@
 #Test utility functionality
 #!/bin/bash
-PAT="cd ~"
+PAT="/home/khimes"
 WOLFSSL="wolfssl"
 ENC="-e"
 DEC="-d"
@@ -17,7 +17,7 @@ SHA3="-sha384"
 SHA5="-sha512"
 BLAKE="-blake2b"
 zero=0
-OPTS="$PAT/cyassl/cyassl/options.h"
+OPTS="$PAT/true_cyassl_clone/cyassl/options.h"
 
 function crypto() {
     COUNTER=8
@@ -25,7 +25,7 @@ function crypto() {
     SIZET=1
 
     until [ $COUNTER -lt 1 ]; do
-        echo Creating File of Size $SIZEF...
+        echo Creating Test File of Size $SIZEF...
         IN=$(mktemp /tmp/input.XXXXXXXXXX) || { echo "Failed to create temp file"; exit 1; }
         OUT=$(mktemp /tmp/output.XXXXXXXXXX) || { echo "Failed to create temp file"; exit 1; }
         KEY=$(cat /dev/urandom | tr -dc 'a-zA-Z0-9' | fold -w 10 | head -n 1)

@@ -43,88 +43,82 @@ int wolfsslEncrypt(char* alg, char* mode, byte* pwdKey, byte* key, int size,
     FILE*  outFile = NULL;          /* output file */
 
     RNG     rng;                    /* random number generator declaration */
+
     byte*   input = NULL;           /* input buffer */
     byte*   output = NULL;          /* output buffer */
     byte    salt[SALT_SIZE] = {0};  /* salt variable */
-    char*   userInputBuffer = NULL; /* buffer for not a file */
 
     int     ret             = 0;    /* return variable */
     int     inputLength     = 0;    /* length of input */
     int     length          = 0;    /* total length */
     int     padCounter      = 0;    /* number of padded bytes */
     int     i               = 0;    /* loop variable */
-    int     convertRet      = 0;
-    int     did_conversion  = 0;
-    word32  tempMax         = MAX;  /* equal to max until padding */
-    word32  tempInputL      = 0;
-    char    inputString[MAX];
-    char    dfault_fname[14] = "converting.txt";
-    char*   dfault_file = dfault_fname;
+    int     hexRet          = 0;    /* hex -> bin return*/
+    
+    word32  tempInputL      = 0;    /* temporary input Length */
+    word32  tempMax         = MAX;  /* controls encryption amount */
+
+    char    inputString[MAX];       /* the input string */
+    char*   userInputBuffer = NULL; /* buffer when input is not a file */
 
 
     if (access (in, F_OK) == -1) {
         printf("file did not exist, encrypting string following \"-i\""
                 "instead.\n");
+
         /* use user entered data to encrypt */
-        inputLength = strlen(in);
+        inputLength = (int) strlen(in);
         userInputBuffer = (char*) malloc(inputLength);
 
         /* writes the entered text to the input buffer */
         memcpy(userInputBuffer, in, inputLength);
+
         /* open the file to write */
-        tempInFile = fopen(dfault_file, "wb");
+        tempInFile = fopen(in, "wb");
         fwrite(userInputBuffer, 1, inputLength, tempInFile);
         fclose(tempInFile);
 
         /* free buffer */
         free(userInputBuffer);
-        did_conversion = 1;
     }
 
     /* open the inFile in read mode */
-    if (did_conversion == 0)
-        inFile = fopen(in, "rb");
-    else
-        inFile = fopen(dfault_file, "rb");
-     
+    inFile = fopen(in, "rb");
 
     /* find length */
     fseek(inFile, 0, SEEK_END);
-    inputLength = ftell(inFile);
+    inputLength = (int) ftell(inFile);
     fseek(inFile, 0, SEEK_SET);
 
     length = inputLength;
 
     /* Start up the random number generator */
-    InitRng(&rng);
+    ret = (int) InitRng(&rng);
+    if (ret != 0) {
+        printf("Random Number Generator failed to start.\n");
+        return ret;
+    }
 
-    /* pads the length until it matches a block / increases pad number */
+    /* pads the length until it matches a block,
+     * and increases pad number 
+     */
     while (length % block != 0) {
         length++;
         padCounter++;
     }
 
-    // /* Ensure 1kB is evenly divisible by block size */
-    // if (MAX % block != 0) {
-    //     printf("Bad Block.\n"); /* This should never happen */
-    //     return ENCRYPT_ERROR;
-    // }
-    // if (length % block != 0) {
-    //     /* ensure blocks will evenly fit into file */
-    //     printf("Error with length mod block size.\n");
-    //     return -1;
-    // }
-
-    /* if the iv was not explicitly set, generate an iv and use the pwdKey */
+    /* if the iv was not explicitly set, 
+     * generate an iv and use the pwdKey 
+     */
     if (ivCheck == 0) {
-        /* if the iv is not set, then generate it */
+        /* IV not set, generate it */
         printf("random IV being generated.\n");
-        /* randomly generate iv if one has not been provided */
         ret = RNG_GenerateBlock(&rng, iv, block);
 
         if (ret != 0) {
             return ret;
         }
+
         /* stretches pwdKey to fit size based on wolfsslGetAlgo() */
         ret = wolfsslGenKey(&rng, pwdKey, size, salt, padCounter);
 
@@ -144,7 +138,7 @@ int wolfsslEncrypt(char* alg, char* mode, byte* pwdKey, byte* key, int size,
     fwrite(iv, 1, block, outFile);
     fclose(outFile);
 
-    /* malloc a 1kB buffers */
+    /* malloc 1kB buffers */
     input = (byte*) malloc(MAX);
     output = (byte*) malloc(MAX);
 
@@ -152,27 +146,28 @@ int wolfsslEncrypt(char* alg, char* mode, byte* pwdKey, byte* key, int size,
     while (length > 0) {
         /* Read in 1kB to input[] */
         if (inputHex == 1)
-            ret = fread(inputString, 1, MAX, inFile);
+            ret = (int) fread(inputString, 1, MAX, inFile);
         else
-            ret = fread(input, 1, MAX, inFile);
-        if (ret != MAX) {           /* ret != MAX on fread */
+            ret = (int) fread(input, 1, MAX, inFile);
 
-            if (feof(inFile)) {     /* we may have reached end of file */
+        if (ret != MAX) {
+            /* check for end of file */
+            if (feof(inFile)) {
 
-                if (inputHex == 1) {/* check if we are using hex or ascii */
-                    convertRet = wolfsslHexToBin(inputString, &input, 
+                /* hex or ascii */
+                if (inputHex == 1) {
+                    hexRet = wolfsslHexToBin(inputString, &input, 
                                                 &tempInputL,
                                                 NULL, NULL, NULL,
                                                 NULL, NULL, NULL,
                                                 NULL, NULL, NULL);
-                     if (convertRet != 0) {
+                     if (hexRet != 0) {
                         printf("failed during conversion of input,"
-                            " ret = %d\n", convertRet);
-                        return -1;
+                            " ret = %d\n", hexRet);
+                        return hexRet;
                     }
-                }/* end Hex or Ascii check */
+                }/* end hex or ascii */
 
-                printf("End of file reached, padding...\n");
                 /* pad to end of block */
                 for (i = ret ; i < (ret + padCounter); i++) {
                     input[i] = padCounter;
@@ -184,11 +179,9 @@ int wolfsslEncrypt(char* alg, char* mode, byte* pwdKey, byte* key, int size,
                 wolfsslFreeBins(input, output, NULL, NULL, NULL);
                 return FREAD_ERROR;
             }/* End feof check */
-        }/* End ret != MAX check */
+        }/* End fread check */
 
-        /* encrypt input[] to output[] and write to outFile */
-
-        /* sets key encrypts the message to ouput from input length + padding */
+        /* sets key encrypts the message to ouput from input */
 #ifndef NO_AES
         if (strcmp(alg, "aes") == 0) {
             if (strcmp(mode, "cbc") == 0) {
@@ -247,24 +240,37 @@ int wolfsslEncrypt(char* alg, char* mode, byte* pwdKey, byte* key, int size,
                 return FATAL_ERROR;
             }
         }
-#endif /* HAVE_CAMELLIA */      
+#endif /* HAVE_CAMELLIA */
+        
+        /* this method added for visual confirmation of nist test vectors,
+         * automated tests to come soon 
+         */
+
+        /* something in the output buffer and using hex */     
         if (output != NULL && inputHex == 1) {
             int tempi;
+
             printf("\nUser specified hex input this is a representation of "
                 "what\nis being written to file in hex form.\n\n[ ");
             for (tempi = 0; tempi < block; tempi++ ) {
                 printf("%02x", output[tempi]);
             }
             printf(" ]\n\n");
-        }
+        } /* end visual confirmation */
         
+        /* Open the outFile in append mode */
         outFile = fopen(out, "ab");
-      
-        ret = fwrite(output, 1, tempMax, outFile);
+        ret = (int) fwrite(output, 1, tempMax, outFile);
 
-        if (ret != (int) tempMax) {
-            printf("wrote too much.\n");
+        if (ferror(outFile)) {
+            printf("failed to write to file.\n");
+            return FWRITE_ERROR;
         }
+        if (ret > MAX) {
+            printf("Wrote too much to file.\n");
+            return FWRITE_ERROR;
+        }
+        /* close the outFile */
         fclose(outFile);
 
         length -= tempMax;
@@ -277,22 +283,14 @@ int wolfsslEncrypt(char* alg, char* mode, byte* pwdKey, byte* key, int size,
     }
 
     /* closes the opened files and frees the memory */
-    //printf("1\n");
-    if (inputHex == 0)
-        fclose(inFile);
-    //printf("2\n");
-    if (input != NULL && output != NULL)
-        wolfsslFreeBins(input, output, NULL, NULL, NULL);
-    //printf("3\n");
-    if (key != NULL)
-        memset(key, 0, size);
-    //printf("4\n");  
-    if (iv != NULL)
-        memset(iv, 0 , block);
-    //printf("5\n");  
+    fclose(inFile);
+    memset(key, 0, size);
+    memset(iv, 0 , block); 
     memset(alg, 0, size);
-    //printf("6\n");
     memset(mode, 0 , block);
-    //printf("7\n");
+    /* Use the cyassl free for rng */
+    printf("freeing RNG.\n");
+    FreeRng(&rng);
+    wolfsslFreeBins(input, output, NULL, NULL, NULL);
     return 0;
 }

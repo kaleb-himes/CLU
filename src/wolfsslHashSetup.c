@@ -65,12 +65,12 @@ int wolfsslHashSetup(int argc, char** argv)
 
     /* help checking */
     if (argc == 2) {
-        wolfsslHelp("-h");
+        wolfsslHelp();
         return 0;
     }
     for (i = 2; i < argc; i++) {
         if (strcmp(argv[i], "-help") == 0) {
-            wolfsslHelp("-h");
+            wolfsslHelp();
             return 0;
         }
     }

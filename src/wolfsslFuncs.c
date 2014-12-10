@@ -22,9 +22,14 @@
 
 #define SALT_SIZE       8
 #define DES3_BLOCK_SIZE 24
-#define LENGTH_IN       (int)strlen(in)      /* type cast unsigned int to int */
-#define SZALGS          (int) sizeof(algs)   /* type cast unsigned int to int */
-#define SZFRST          (int) sizeof(algs[0])/* type cast unsigned int to int */
+
+ /* type casting to integers for comparison */
+#define LENGTH_IN       (int)strlen(in)
+#define SZALGS1         (int) sizeof(algsenc)
+#define SZALGS2         (int) sizeof(algsother)
+#define SZFRST1         (int) sizeof(algsenc[0])
+#define SZFRST2         (int) sizeof(algsother[0])
+/*end type casting */
 
 #ifdef HAVE_BLAKE2
     #define BLAKE_DIGEST_SIZE 64
@@ -34,13 +39,45 @@ int     loop       =   1;       /* benchmarking loop */
 int     i          =   0;       /* loop variable */
 int64_t blocks;                 /* blocks used during benchmarking */
 
+/* 
+ * generic help function
+ */
+ void wolfsslHelp()
+ {  printf("*************************************************************\n");
+    printf("-help           Help, print out this help menu\n");
+    printf("*************************************************************\n");
+    printf("Only set one of the following.\n\n");
+    printf("-e              Encrypt a file or some user input\n");
+    printf("-d              Decrypt an encrypted file\n");
+    printf("-h              Hash a file or input\n");
+    printf("-b              Benchmark one of the algorithms\n");
+    printf("*************************************************************\n");
+    /*optional flags*/
+    printf("Optional Flags.\n\n");
+    printf("-i              input file to manage\n");
+    printf("-o              file to output as a result of option\n");
+    printf("-p              user custom password\n");
+    printf("-V              user custom IV (hex input only)\n");
+    printf("-K              user custom key(hex input only)\n");
+    printf("-x              when using -V and -k this will print result of\n"
+           "                encryption for user verification.\n"
+           "                This flag takes no arguments.\n");
+    printf("-l              used by Hash, set length of string to hash.\n");
+    printf("-t              used by Benchmark, set time in seconds to run.\n");
+    printf("-v              display a more verbose help menu\n");
+    printf("*************************************************************\n");
+        /* encryption/decryption help lists options */
+    printf("\nUSAGE: wolfssl [-e | -d] <-algorithm> <-i filename> \n"
+           "EXAMPLE: \n\nwolfssl -e aes-cbc-128 -p Thi$i$myPa$$w0rd"
+           "-i somefile.txt -o encryptedfile.txt\n\n");
+ }
+
 /*
- * help function
+ * verbose help function
  */ 
-void wolfsslHelp(const char* name)
+void wolfsslVerboseHelp()
 {
-    if (strcmp(name, "-h") == 0) {    /* hash help prints hash options */
-        const char* algs[] = {        /* list of acceptable algorithms */
+    const char* algsenc[] = {        /* list of acceptable algorithms */
 #ifndef NO_MD5
             "-md5"
 #endif
@@ -61,18 +98,8 @@ void wolfsslHelp(const char* name)
 #endif
         };
 
-        printf("\nUSAGE: cyassl hash <-algorithm> <-i filename> [-o filename]"
-                " [-s size]\n");
-        printf("\n( NOTE: *size use for Blake2b range: 1-64)\n");
-        printf("Available algorithms with current configure settings:\n\n");
-        for (i = 0; i < SZALGS/SZFRST; i++) {
-            printf("%s\n", algs[i]);
-        }
-        printf("\n");
-    }
-    /* benchmark help lists benchmark options */
-    else if (strcmp(name, "-b") == 0) { 
-        const char* algs[] = {      /* list of acceptable algorithms */
+    /* benchmark options */
+    const char* algsother[] = {      /* list of acceptable algorithms */
 #ifndef NO_AES
             "-aes-cbc"
 #endif
@@ -104,21 +131,10 @@ void wolfsslHelp(const char* name)
                 , "-blake2b"
 #endif
         };
-        printf("\nUsage: cyassl benchmark [-t timer(1-10)] [-alg]\n");
-        printf("\nAvailable tests: (-all to test all)\n");
-        printf("Available tests with current configure settings:\n\n");
-        for(i = 0; i < SZALGS/SZFRST; i++) {
-            printf("%s\n", algs[i]);
-        }
-        printf("\n");
-    }
-    else {
-        /* encryption/decryption help lists options */
-        printf("\nUSAGE: wolfssl %s <-algorithm> <-i filename> ", name);
-        printf("[-o filename] [-k password] [-iv IV]\n\n"
-                "Available Algorithms with current configure settings.\n\n");
+        printf("\nwolfssl Command Line Utility version 0.1\n\n");
+        printf("Available En/De crypt Algorithms with current configure settings.\n");
 #ifndef NO_AES
-        printf("\n-aes-cbc-128\t\t-aes-cbc-192\t\t-aes-cbc-256\n");
+        printf("-aes-cbc-128\t\t-aes-cbc-192\t\t-aes-cbc-256\n");
 #endif
 #ifdef CYASSL_AES_COUNTER
         printf("-aes-ctr-128\t\t-aes-ctr-192\t\t-aes-ctr-256\n");
@@ -130,8 +146,18 @@ void wolfsslHelp(const char* name)
         printf("-camellia-cbc-128\t-camellia-cbc-192\t"
                 "-camellia-cbc-256\n");
 #endif
-        printf("\n");
+    printf("\nUsage: wolfssl -h [-l length] [-alg]");
+    printf("\nAvailable algorithms with current configure settings:\n");
+    for (i = 0; i < SZALGS1/SZFRST1; i++) {
+            printf("%s\n", algsenc[i]);
     }
+    printf("\nUsage: wolfssl -b [-t timer(1-10)] [-alg]");
+    printf("\nAvailable tests: (-all to test all)\n");
+    printf("Available tests with current configure settings:\n");
+    for(i = 0; i < SZALGS2/SZFRST2; i++) {
+        printf("%s\n", algsother[i]);
+    }
+    printf("\n");
 }
 
 /*
@@ -189,7 +215,7 @@ int wolfsslGetAlgo(char* name, char** alg, char** mode, int* size)
     if (strcmp(*alg, "aes") == 0) {
         ret = AES_BLOCK_SIZE;
         if (*size != 128 && *size != 192 && *size != 256) {
-            printf("Invalid AES pwdKey size\n");
+            printf("Invalid AES pwdKey size. Should be: %d\n", ret);
             ret = FATAL_ERROR;
         }
     }
@@ -234,11 +260,14 @@ int wolfsslGenKey(RNG* rng, byte* pwdKey, int size, byte* salt, int pad)
     if (ret != 0)
         return ret;
 
-    if (pad == 0)        /* sets first value of salt to check if the */
-        salt[0] = 0;            /* message is padded */
+    /* set first value of salt to let us know
+     * if message has padding or not 
+     */
+    if (pad == 0)
+        salt[0] = 0;
 
     /* stretches pwdKey */
-    ret = PBKDF2(pwdKey, pwdKey, strlen((const char*)pwdKey), salt, SALT_SIZE, 
+    ret = (int) PBKDF2(pwdKey, pwdKey, strlen((const char*)pwdKey), salt, SALT_SIZE, 
                                                             4096, size, SHA256);
     if (ret != 0)
         return ret;
@@ -253,6 +282,7 @@ int wolfsslNoEcho(char* pwdKey, int size)
 {
     struct termios oflags, nflags;
     char* success;
+    int ret;
 
     /* disabling echo */
     tcgetattr(fileno(stdin), &oflags);
@@ -268,12 +298,16 @@ int wolfsslNoEcho(char* pwdKey, int size)
     printf("pwdKey: ");
     success = fgets(pwdKey, size, stdin);
     if (success == NULL) {
-        /* User wants manual input to be encrypted */
-        /* Do Nothing */
+        /* User wants manual input to be encrypted
+         * Do Nothing 
+         */
     }
+
     pwdKey[strlen(pwdKey) - 1] = 0;
+    
     /* restore terminal */
-    if (tcsetattr(fileno(stdin), TCSANOW, &oflags) != 0) {
+    ret = tcsetattr(fileno(stdin), TCSANOW, &oflags);
+    if (ret != 0) {
         printf("Error\n");
         return FATAL_ERROR;
     }
@@ -285,7 +319,7 @@ int wolfsslNoEcho(char* pwdKey, int size)
  */
 void wolfsslAppend(char* s, char c)
 {
-    int len = strlen(s); /* length of string*/
+    int len = (int) strlen(s); /* length of string*/
 
     s[len] = c;
     s[len+1] = '\0';

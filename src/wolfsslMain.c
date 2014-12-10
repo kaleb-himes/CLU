@@ -20,39 +20,11 @@
 
 #include "include/wolfssl.h"
 
-void help()
-{
-    printf("\nwolfSSL command line utility help menu\n\n");
-    printf("-help           Help, print out this help menu\n\n");
-    printf("Only use one of these ***************************************\n\n");
-    printf("-e              Encrypt a file or some user input\n");
-    printf("-d              Decrypt an encrypted file\n");
-    printf("-h              Hash a file or input\n");
-    printf("-b              Benchmark one of the algorithms\n\n");
-    printf("*************************************************************\n\n");
-    /*optional flags*/
-    printf("Optional flags **********************************************\n\n");
-    printf("-i              input file to manage\n");
-    printf("-o              file to output as a result of option\n");
-    printf("-p              user custom password\n");
-    printf("-V              user custom IV\n");
-    printf("-k              user custom key\n\n");
-    printf("*************************************************************\n\n");
-    printf("\nUSAGE: ./wolfssl COMMAND [optional flags]... [in_file, out_file]"
-        "\n\n"
-        "EXAMPLE: ./wolfssl -e -aes-cbc-128 -k Thi$i$myPa$$w0rd "
-        " -i somejunk.txt -o encryptedjunk.txt\n\n"
-        "NOTE: start with -e, -d, -h, or -b and end with"
-        "-i <string or file name> -o <file name>.\n"
-        "Other flags are optional with optional order.\n\n");
-}
-
 int main(int argc, char** argv)
 {
     int ret = 0;
     int option;
-
-    while ((option = getopt (argc, argv, "e:d:h:b:i:o:p:V:K:l:t:x")) != -1)  { 
+    while ((option = getopt (argc, argv, "e:d:h:b:i:o:p:V:K:l:t:xv")) != -1)  { 
         switch (option) 
         {
             /* User wants to encrypt data or file*/ 
@@ -86,9 +58,10 @@ int main(int argc, char** argv)
                 break;
             case 'x':/* will be handled by benchSetup function*/
                 break;
-
+            case 'v':
+                wolfsslVerboseHelp();
             default:
-                help();
+                wolfsslHelp();
         }
     }
     if (ret != 0)

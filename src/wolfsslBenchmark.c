@@ -36,24 +36,26 @@ int wolfsslBenchmark(int timer, int* option)
     int i              =   0;       /* A looping variable */
 
     int     loop       =   1;       /* benchmarking loop */
-    int64_t blocks     =    0;      /* blocks used during benchmarking */
+    int64_t blocks     =   0;      /* blocks used during benchmarking */
 #ifndef NO_AES
-    Aes aes;                /* aes declaration */
+    Aes aes;                        /* aes declaration */
 #endif
 
 #ifndef NO_DES3
-    Des3 des3;              /* 3des declaration */
+    Des3 des3;                      /* 3des declaration */
 #endif
 
-    RNG rng;                /* random number generator */
+    RNG rng;                        /* random number generator */
 
-    int             ret = 0;/* return variable */
-    double          start;  /* start time */
-    ALIGN16 byte*   plain;  /* plain text */
-    ALIGN16 byte*   cipher; /* cipher */
-    ALIGN16 byte*   key;    /* key for testing */
-    ALIGN16 byte*   iv;     /* iv for initial encoding */
-    byte*           digest; /* message digest */
+    int             ret = 0;        /* return variable */
+    double          start;          /* start time */
+
+    ALIGN16 byte*   plain;          /* plain text */
+    ALIGN16 byte*   cipher;         /* cipher */
+    ALIGN16 byte*   key;            /* key for testing */
+    ALIGN16 byte*   iv;             /* iv for initial encoding */
+    
+    byte*           digest;         /* message digest */
 
     InitRng(&rng);
 
@@ -288,8 +290,9 @@ int wolfsslBenchmark(int timer, int* option)
         memset(digest, 0, SHA256_DIGEST_SIZE);
         free(plain);
         free(digest);
-        blocks = 0;
-        loop = 1;
+        /* resets used for debug, uncomment if needed */
+        /* blocks = 0; */
+        /* loop = 1; */
     }
     i++;
 #endif

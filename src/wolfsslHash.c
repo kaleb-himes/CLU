@@ -1,4 +1,4 @@
-/* wolfsslHash.c.c
+/* wolfsslHash.c
  *
  * Copyright (C) 2006-2014 wolfSSL Inc.
  * This file is part of CyaSSL.
@@ -65,7 +65,7 @@ int wolfsslHash(char* in, char* len, char* out, char* alg, int size)
     else {
         /* if input file provided finds end of file for length */
         fseek(inFile, 0, SEEK_END);
-        int leng = ftell(inFile);
+        int leng = (int) ftell(inFile);
         fseek(inFile, 0, SEEK_SET);
 
         if (len != NULL) {
@@ -81,7 +81,7 @@ int wolfsslHash(char* in, char* len, char* out, char* alg, int size)
             printf("Failed to create input buffer\n");
             return FATAL_ERROR;
         }
-        ret = fread(input, 1, length, inFile);
+        ret = (int) fread(input, 1, length, inFile);
         fclose(inFile);
     }
     /* hashes using accepted algorithm */

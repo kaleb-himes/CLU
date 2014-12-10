@@ -27,6 +27,7 @@ DISTCLEANFILES+= aminclude.am
 
 ACLOCAL_AMFLAGS= -I m4
 
+EXTRA_DIST+= tests
 
 include src/include.am
 include include/include.am

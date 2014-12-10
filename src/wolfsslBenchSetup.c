@@ -20,16 +20,16 @@
 
 #include "include/wolfssl.h"
 
-#define SZALGS          (int) sizeof(algs)   /* type cast unsigned int to int */
-#define SZFRST          (int) sizeof(algs[0])/* type cast unsigned int to int */
+#define SZALGS (int) sizeof(algs)   /* type cast unsigned int to int */
+#define SZFRST (int) sizeof(algs[0])/* type cast unsigned int to int */
 
 
 int wolfsslBenchSetup(int argc, char** argv)
 {
-    int     ret     =   0;      /* return variable */
-    int     time    =   3;      /* timer variable */
-    int     i, j    =   0;      /* second loop variable */
-    const char*   algs[]  =   { /* list of acceptable algorithms */
+    int     ret     =   0;          /* return variable */
+    int     time    =   3;          /* timer variable */
+    int     i, j    =   0;          /* second loop variable */
+    const char*   algs[]  =   {     /* list of acceptable algorithms */
 #ifndef NO_AES
         "-aes-cbc"
 #endif
@@ -68,7 +68,7 @@ int wolfsslBenchSetup(int argc, char** argv)
     for (i = 2; i < argc; i++) {
         if (strcmp(argv[i], "-help") == 0) {
             /* help checking */
-            wolfsslHelp("-b");
+            wolfsslHelp();
             return 0;
         }
         for (j = 0; j < SZALGS/SZFRST; j++) {
@@ -97,7 +97,7 @@ int wolfsslBenchSetup(int argc, char** argv)
     }
     if (optionCheck != 1) {
         /* help checking */
-        wolfsslHelp("-b");
+        wolfsslHelp();
     }
     else {
         /* benchmarking function */
