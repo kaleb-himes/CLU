@@ -20,10 +20,6 @@
 
 #include "include/wolfssl.h"
 
-#define SZALGS (int) sizeof(algs)   /* type cast unsigned int to int */
-#define SZFRST (int) sizeof(algs[0])/* type cast unsigned int to int */
-
-
 int wolfsslBenchSetup(int argc, char** argv)
 {
     int     ret     =   0;          /* return variable */
@@ -31,34 +27,34 @@ int wolfsslBenchSetup(int argc, char** argv)
     int     i, j    =   0;          /* second loop variable */
     const char*   algs[]  =   {     /* list of acceptable algorithms */
 #ifndef NO_AES
-        "-aes-cbc"
+        "aes-cbc"
 #endif
 #ifdef CYASSL_AES_COUNTER
-            , "-aes-ctr"
+            , "aes-ctr"
 #endif
 #ifndef NO_DES3
-            , "-3des"
+            , "3des"
 #endif
 #ifdef HAVE_CAMELLIA
-            , "-camellia"
+            , "camellia"
 #endif
 #ifndef NO_MD5
-            , "-md5"
+            , "md5"
 #endif
 #ifndef NO_SHA
-            , "-sha"
+            , "sha"
 #endif
 #ifndef NO_SHA256
-            , "-sha256"
+            , "sha256"
 #endif
 #ifdef CYASSL_SHA384
-            , "-sha384"
+            , "sha384"
 #endif
 #ifdef CYASSL_SHA512
-            , "-sha512"
+            , "sha512"
 #endif
 #ifdef HAVE_BLAKE2
-            , "-blake2b"
+            , "blake2b"
 #endif
     };
 
@@ -68,10 +64,10 @@ int wolfsslBenchSetup(int argc, char** argv)
     for (i = 2; i < argc; i++) {
         if (strcmp(argv[i], "-help") == 0) {
             /* help checking */
-            wolfsslHelp();
+            wolfsslBenchHelp();
             return 0;
         }
-        for (j = 0; j < SZALGS/SZFRST; j++) {
+        for (j = 0; j < (int) sizeof(algs)/(int) sizeof(algs[0]); j++) {
             /* checks for individual tests in the arguments */
             if (strcmp(argv[i], algs[j]) == 0) {
                 option[j] = 1;    
@@ -87,9 +83,9 @@ int wolfsslBenchSetup(int argc, char** argv)
             }
             i++;
         }
-        if (strcmp(argv[i], "-all") == 0) {
+        if (strcmp(argv[i], "-a") == 0) {
             /* perform all available tests */
-            for (j = 0; j < SZALGS/SZFRST; j++) {
+            for (j = 0; j < (int) sizeof(algs)/(int) sizeof(algs[0]); j++) {
                 option[j] = 1;
                 optionCheck = 1;
             }

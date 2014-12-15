@@ -24,24 +24,32 @@ int main(int argc, char** argv)
 {
     int ret = 0;
     int option;
-    while ((option = getopt (argc, argv, "e:d:h:b:i:o:p:V:K:l:t:xv")) != -1)  { 
+    if (argc == 1) {
+        printf("Main Help.\n");
+        wolfsslHelp();
+    }
+    while ((option = getopt (argc, argv, "e:d:h:b:i:o:p:V:K:t:axv")) != -1)  { 
         switch (option) 
         {
             /* User wants to encrypt data or file*/ 
             case 'e':
+                if (argc == 2) {
+                    wolfsslEncryptHelp();
+                    return 0;
+                }
                 ret = wolfsslSetup(argc, argv, 'e');
-                break;
+                return 0;
                 /* User wants to decrypt some data or file */    
             case 'd':
                 ret = wolfsslSetup(argc, argv, 'd');
-                break;
+                return 0;
                 /* User wants to hash some data/file */
             case 'h':
                 ret = wolfsslHashSetup(argc, argv);
-                break;   
+                return 0;  
             case 'b':
                 ret = wolfsslBenchSetup(argc, argv);
-                break;
+                return 0;
             case 'i':/* will be handled by Setup function */
                 break;
             case 'o':/* will be handled by Setup function */
@@ -52,16 +60,20 @@ int main(int argc, char** argv)
                 break;
             case 'K':/* will be handled by Setup function */
                 break;
-            case 'l':/* will be handled by hashSetup function */
+            case 'a':/* will be handled by benchmarkSetup function */
                 break;
             case 't':/* will be handled by benchSetup function */
                 break;
             case 'x':/* will be handled by benchSetup function*/
                 break;
             case 'v':
-                wolfsslVerboseHelp();
+                wolfsslVersion();
+                return 0;
+                break;
             default:
-                wolfsslHelp();
+                printf("Main Help Default.\n");
+                wolfsslVerboseHelp();
+                return 0;
         }
     }
     if (ret != 0)

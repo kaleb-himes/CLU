@@ -65,6 +65,13 @@
 #define MEGABYTE (1024*1024)
 #define MAX_THREADS 64
 
+ /* @VERSION 
+  * Update every time library change, 
+  * functionality shift, 
+  * or code update 
+  */
+#define VERSION 0.3
+
 /* encryption argument function
  *
  * @param argc holds all command line input
@@ -87,11 +94,35 @@ int wolfsslHashSetup(int argc, char** argv);
  */
 int wolfsslBenchSetup(int argc, char** argv);
 
-/* verbose help function */
+/* 
+ * generic help function 
+ */
+void wolfsslHelp(void);
+
+/* 
+ * verbose help function 
+ */
 void wolfsslVerboseHelp(void);
 
-/* generic help function */
-void wolfsslHelp(void);
+/* 
+ * encrypt help function 
+ */
+void wolfsslEncryptHelp(void);
+
+/* 
+ * decrypt help function
+ */
+void wolfsslDecryptHelp(void);
+
+/* 
+ * hash help function 
+ */
+void wolfsslHashHelp(void);
+
+/* 
+ * benchmark help function
+ */
+void wolfsslBenchHelp(void);
 
 /* find algorithm for encryption/decryption 
  * 
@@ -170,7 +201,7 @@ void wolfsslFreeBins(byte* b1, byte* b2, byte* b3, byte* b4, byte* b5);
  * @param start the time when the benchmark was started
  * @param blockSize the block size of the algorithm being benchmarked
  */
-void wolfsslStats(double start, int blockSize);
+void wolfsslStats(double start, int blockSize, int64_t blocks);
 
 /* encryption function
  *
@@ -228,6 +259,11 @@ int wolfsslBenchmark(int timer, int* option);
  * @param alg
  * @param size
  */
-int wolfsslHash(char* in, char* len, char* out, char* alg, int size);
+int wolfsslHash(char* in, char* out, char* alg, int size);
+/*
+ * get the current Version
+ */
+void wolfsslVersion(void);
 #endif
+
 

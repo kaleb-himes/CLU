@@ -22,4 +22,6 @@ encryption or decryption are:
         --enable-sha512
         --enable-fortress
 
-then run make and make install before using wolfssl CLU
+then run "./configure", "make", and "make install" before using wolfssl CLU
+
+Thank you and have fun!

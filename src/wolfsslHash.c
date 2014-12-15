@@ -25,7 +25,7 @@
 /*
  * hashing function 
  */
-int wolfsslHash(char* in, char* len, char* out, char* alg, int size)
+int wolfsslHash(char* in, char* out, char* alg, int size)
 {
 #ifdef HAVE_BLAKE2
     Blake2b hash;               /* blake2b declaration */
@@ -47,11 +47,7 @@ int wolfsslHash(char* in, char* len, char* out, char* alg, int size)
     inFile = fopen(in, "rb");
     if (inFile == NULL) {
         /* if no input file was provided */
-        if (len != NULL)
-            /* if length was provided */
-            length = atoi(len);
-        else
-            length = LENGTH_IN;
+        length = LENGTH_IN;
 
         input = malloc(length);
         memset(input, 0, length);
@@ -68,12 +64,7 @@ int wolfsslHash(char* in, char* len, char* out, char* alg, int size)
         int leng = (int) ftell(inFile);
         fseek(inFile, 0, SEEK_SET);
 
-        if (len != NULL) {
-            /* if length is provided */
-            length = atoi(len);
-        }
-        else 
-            length = leng;
+        length = leng;
 
         input = malloc(length+1);
         memset(input, 0, length+1);
@@ -86,32 +77,32 @@ int wolfsslHash(char* in, char* len, char* out, char* alg, int size)
     }
     /* hashes using accepted algorithm */
 #ifndef NO_MD5    
-    if (strcmp(alg, "-md5") == 0) {
+    if (strcmp(alg, "md5") == 0) {
         ret = Md5Hash(input, length, output);
     }
 #endif
 #ifndef NO_SHA  
-    else if (strcmp(alg, "-sha") == 0) {
+    else if (strcmp(alg, "sha") == 0) {
         ret = ShaHash(input, length, output);
     }
 #endif
 #ifndef NO_SHA256  
-    else if (strcmp(alg, "-sha256") == 0) {
+    else if (strcmp(alg, "sha256") == 0) {
         ret = Sha256Hash(input, length, output);
     }
 #endif
 #ifdef CYASSL_SHA384
-    else if (strcmp(alg, "-sha384") == 0) {
+    else if (strcmp(alg, "sha384") == 0) {
         ret = Sha384Hash(input, length, output);
     }
 #endif
 #ifdef CYASSL_SHA512
-    else if (strcmp(alg, "-sha512") == 0) {
+    else if (strcmp(alg, "sha512") == 0) {
         ret = Sha512Hash(input, length, output);
     }
 #endif
 #ifdef HAVE_BLAKE2
-    else if (strcmp(alg, "-blake2b") == 0) { 
+    else if (strcmp(alg, "blake2b") == 0) { 
         ret = InitBlake2b(&hash, size);
         ret = Blake2bUpdate(&hash, input, length);
         ret = Blake2bFinal(&hash, output, size);

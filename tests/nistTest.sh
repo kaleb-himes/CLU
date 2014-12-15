@@ -1,5 +1,4 @@
 #!/bin/bash
-PAT="/home/khimes/work/"
 GREEN='\e[0;32m'
 RED='\e[0;31m'
 NC='\e[0m'
@@ -17,12 +16,12 @@ function hashtest() {
     while read -r md; do
         #if $i < 10
         if [[ $i -lt 10 ]]; then
-            FILE="$PAT/utility/tests/byte000$i.dat"
+            FILE="./byte000$i.dat"
         #if $i < 100 
         elif [[ $i -lt 100 ]]; then
-            FILE="$PAT/utility/tests/byte00$i.dat"
+            FILE="./byte00$i.dat"
         elif [[ $i -lt 1000 ]]; then
-            FILE="$PAT/utility/tests/byte0$i.dat"
+            FILE="./byte0$i.dat"
         else 
             break
         fi   
@@ -36,7 +35,7 @@ function hashtest() {
 #converts to lowercase
 #        md=${md,,}
         md="$(tr [A-Z] [a-z] <<< "$md")"
-        cipher="$(wolfssl -h -$2 -i $FILE -l $i)"
+        cipher="$(wolfssl -h $2 -i $FILE)"
         echo "$cipher                   $md"
         #compare result of hash to line in file byte-hashes.sha1
         if test "$cipher" != "$md"; then
@@ -53,5 +52,5 @@ function hashtest() {
     fi
 }
 echo Testing...
-hashtest $PAT/utility/tests/byte-hashes.sha1 sha 3
-hashtest $PAT/utility/tests/byte-hashes.md5 md5 2
+hashtest ./byte-hashes.sha1 sha 3
+hashtest ./byte-hashes.md5 md5 2

@@ -1,7 +1,7 @@
 #! /bin/sh
  
 package="wolfssl"
-version="0.1"
+version="0.3"
 libs="-lwolfssl -lcyassl"
  
 prefix="/usr/local"

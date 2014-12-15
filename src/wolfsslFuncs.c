@@ -19,16 +19,11 @@
  */
 
 #include "include/wolfssl.h"
+ #include "include/version.h"
 
 #define SALT_SIZE       8
 #define DES3_BLOCK_SIZE 24
 
- /* type casting to integers for comparison */
-#define LENGTH_IN       (int)strlen(in)
-#define SZALGS1         (int) sizeof(algsenc)
-#define SZALGS2         (int) sizeof(algsother)
-#define SZFRST1         (int) sizeof(algsenc[0])
-#define SZFRST2         (int) sizeof(algsother[0])
 /*end type casting */
 
 #ifdef HAVE_BLAKE2
@@ -37,21 +32,20 @@
 
 int     loop       =   1;       /* benchmarking loop */
 int     i          =   0;       /* loop variable */
-int64_t blocks;                 /* blocks used during benchmarking */
 
 /* 
  * generic help function
  */
  void wolfsslHelp()
- {  printf("*************************************************************\n");
+ {  printf("\n");
     printf("-help           Help, print out this help menu\n");
-    printf("*************************************************************\n");
+    printf("\n");
     printf("Only set one of the following.\n\n");
     printf("-e              Encrypt a file or some user input\n");
     printf("-d              Decrypt an encrypted file\n");
     printf("-h              Hash a file or input\n");
     printf("-b              Benchmark one of the algorithms\n");
-    printf("*************************************************************\n");
+    printf("\n");
     /*optional flags*/
     printf("Optional Flags.\n\n");
     printf("-i              input file to manage\n");
@@ -62,14 +56,13 @@ int64_t blocks;                 /* blocks used during benchmarking */
     printf("-x              when using -V and -k this will print result of\n"
            "                encryption for user verification.\n"
            "                This flag takes no arguments.\n");
-    printf("-l              used by Hash, set length of string to hash.\n");
     printf("-t              used by Benchmark, set time in seconds to run.\n");
     printf("-v              display a more verbose help menu\n");
-    printf("*************************************************************\n");
-        /* encryption/decryption help lists options */
-    printf("\nUSAGE: wolfssl [-e | -d] <-algorithm> <-i filename> \n"
-           "EXAMPLE: \n\nwolfssl -e aes-cbc-128 -p Thi$i$myPa$$w0rd"
-           "-i somefile.txt -o encryptedfile.txt\n\n");
+
+    printf("\nFor encryption:   wolfssl -e -help\n");
+    printf("For decryption:   wolfssl -d -help\n");
+    printf("For hashing:      wolfssl -h -help\n");
+    printf("For benchmarking: wolfssl -b -help\n\n");
  }
 
 /*
@@ -77,87 +70,239 @@ int64_t blocks;                 /* blocks used during benchmarking */
  */ 
 void wolfsslVerboseHelp()
 {
+    printf("\nwolfssl Command Line Utility version %3.1f\n\n", VERSION);
+    /* hash options */
     const char* algsenc[] = {        /* list of acceptable algorithms */
 #ifndef NO_MD5
-            "-md5"
+            "md5"
 #endif
 #ifndef NO_SHA
-                ,"-sha"
+                ,"sha"
 #endif
 #ifndef NO_SHA256
-                ,"-sha256"
+                ,"sha256"
 #endif
 #ifdef CYASSL_SHA384
-                ,"-sha384"
+                ,"sha384"
 #endif
 #ifdef CYASSL_SHA512
-                ,"-sha512"
+                ,"sha512"
 #endif
 #ifdef HAVE_BLAKE2
-                ,"-blake2b"
+                ,"blake2b"
 #endif
         };
 
     /* benchmark options */
     const char* algsother[] = {      /* list of acceptable algorithms */
 #ifndef NO_AES
-            "-aes-cbc"
+            "aes-cbc"
 #endif
 #ifdef CYASSL_AES_COUNTER
-                , "-aes-ctr"
+                , "aes-ctr"
 #endif
 #ifndef NO_DES3
-                , "-3des"
+                , "3des"
 #endif
 #ifdef HAVE_CAMELLIA
-                , "-camellia"
+                , "camellia"
 #endif
 #ifndef NO_MD5
-                , "-md5"
+                , "md5"
 #endif
 #ifndef NO_SHA
-                , "-sha"
+                , "sha"
 #endif
 #ifndef NO_SHA256
-                , "-sha256"
+                , "sha256"
 #endif
 #ifdef CYASSL_SHA384
-                , "-sha384"
+                , "sha384"
 #endif
 #ifdef CYASSL_SHA512
-                , "-sha512"
+                , "sha512"
 #endif
 #ifdef HAVE_BLAKE2
-                , "-blake2b"
+                , "blake2b"
 #endif
         };
-        printf("\nwolfssl Command Line Utility version 0.1\n\n");
-        printf("Available En/De crypt Algorithms with current configure settings.\n");
+        wolfsslHelp();
+        
+        printf("Available En/De crypt Algorithms with current configure "
+            "settings.\n\n");
 #ifndef NO_AES
-        printf("-aes-cbc-128\t\t-aes-cbc-192\t\t-aes-cbc-256\n");
+        printf("aes-cbc-128\t\taes-cbc-192\t\taes-cbc-256\n");
 #endif
 #ifdef CYASSL_AES_COUNTER
-        printf("-aes-ctr-128\t\t-aes-ctr-192\t\t-aes-ctr-256\n");
+        printf("aes-ctr-128\t\taes-ctr-192\t\taes-ctr-256\n");
 #endif
 #ifndef NO_DES3
-        printf("-3des-cbc-56\t\t-3des-cbc-112\t\t-3des-cbc-168\n");
+        printf("3des-cbc-56\t\t3des-cbc-112\t\t3des-cbc-168\n");
 #endif
 #ifdef HAVE_CAMELLIA
-        printf("-camellia-cbc-128\t-camellia-cbc-192\t"
-                "-camellia-cbc-256\n");
+        printf("camellia-cbc-128\tcamellia-cbc-192\t"
+                "camellia-cbc-256\n");
 #endif
-    printf("\nUsage: wolfssl -h [-l length] [-alg]");
-    printf("\nAvailable algorithms with current configure settings:\n");
-    for (i = 0; i < SZALGS1/SZFRST1; i++) {
+    printf("\n");
+    printf("Available hashing algorithms with current configure settings:\n\n");
+
+    for (i = 0; i < (int) sizeof(algsenc)/(int) sizeof(algsenc[0]); i++) {
             printf("%s\n", algsenc[i]);
     }
-    printf("\nUsage: wolfssl -b [-t timer(1-10)] [-alg]");
-    printf("\nAvailable tests: (-all to test all)\n");
+    printf("Available benchmark tests with current configure settings:\n");
+    printf("(-a to test all)\n\n");
+
+    for(i = 0; i < (int) sizeof(algsother)/(int) sizeof(algsother[0]); i++) {
+        printf("%s\n", algsother[i]);
+    }
+}
+
+/*
+ * Encrypt Usage
+ */
+void wolfsslEncryptHelp()
+{
+    printf("\nAvailable En/De crypt Algorithms with current configure "
+            "settings.\n\n");
+#ifndef NO_AES
+        printf("aes-cbc-128\t\taes-cbc-192\t\taes-cbc-256\n");
+#endif
+#ifdef CYASSL_AES_COUNTER
+        printf("aes-ctr-128\t\taes-ctr-192\t\taes-ctr-256\n");
+#endif
+#ifndef NO_DES3
+        printf("3des-cbc-56\t\t3des-cbc-112\t\t3des-cbc-168\n");
+#endif
+#ifdef HAVE_CAMELLIA
+        printf("camellia-cbc-128\tcamellia-cbc-192\t"
+                "camellia-cbc-256\n\n");
+#endif
+    printf("***************************************************************\n");
+    printf("\nENCRYPT USAGE: wolfssl -e <-algorithm> -i <filename> "
+           "-p <password> -o <output file name>\n\n");
+    printf("***************************************************************\n");
+    printf("\nEXAMPLE: \n\nwolfssl -e aes-cbc-128 -p Thi$i$myPa$$w0rd"
+           " -i somefile.txt -o encryptedfile.txt\n\n");
+}
+
+/*
+ * Decrypt Usage
+ */
+void wolfsslDecryptHelp()
+{
+    printf("\nAvailable En/De crypt Algorithms with current configure "
+            "settings.\n\n");
+#ifndef NO_AES
+        printf("aes-cbc-128\t\taes-cbc-192\t\taes-cbc-256\n");
+#endif
+#ifdef CYASSL_AES_COUNTER
+        printf("aes-ctr-128\t\taes-ctr-192\t\taes-ctr-256\n");
+#endif
+#ifndef NO_DES3
+        printf("3des-cbc-56\t\t3des-cbc-112\t\t3des-cbc-168\n");
+#endif
+#ifdef HAVE_CAMELLIA
+        printf("camellia-cbc-128\tcamellia-cbc-192\t"
+                "camellia-cbc-256\n\n");
+#endif
+    printf("***************************************************************\n");
+    printf("\nDECRYPT USAGE: wolfssl -d <-algorithm> -i <encrypted file name> "
+           "-p <password> -o <output file name>\n\n");
+    printf("***************************************************************\n");
+    printf("\nEXAMPLE: \n\nwolfssl -d aes-cbc-128 -p Thi$i$myPa$$w0rd"
+           " -i encryptedfile.txt -o decryptedfile.txt\n\n");
+}
+
+/*
+ * Hash Usage
+ */
+void wolfsslHashHelp()
+{
+    printf("\n");
+    /* hash options */
+    const char* algsenc[] = {        /* list of acceptable algorithms */
+#ifndef NO_MD5
+            "md5"
+#endif
+#ifndef NO_SHA
+                ,"sha"
+#endif
+#ifndef NO_SHA256
+                ,"sha256"
+#endif
+#ifdef CYASSL_SHA384
+                ,"sha384"
+#endif
+#ifdef CYASSL_SHA512
+                ,"sha512"
+#endif
+#ifdef HAVE_BLAKE2
+                ,"blake2b"
+#endif
+        };
+
+    printf("\nAvailable algorithms with current configure settings:\n");
+    for (i = 0; i < (int) sizeof(algsenc)/(int) sizeof(algsenc[0]); i++) {
+            printf("%s\n", algsenc[i]);
+    }
+            /* encryption/decryption help lists options */
+    printf("***************************************************************\n");
+    printf("\nUSAGE: wolfssl -h <-algorithm> -i <file to hash>\n");
+    printf("***************************************************************\n");
+    printf("\nEXAMPLE: \n\nwolfssl -h sha -i <some file>\n\n");
+}
+
+/*
+ * Benchmark Usage
+ */
+void wolfsslBenchHelp()
+{
+    printf("\n");
+        /* benchmark options */
+    const char* algsother[] = {      /* list of acceptable algorithms */
+#ifndef NO_AES
+            "aes-cbc"
+#endif
+#ifdef CYASSL_AES_COUNTER
+                , "aes-ctr"
+#endif
+#ifndef NO_DES3
+                , "3des"
+#endif
+#ifdef HAVE_CAMELLIA
+                , "camellia"
+#endif
+#ifndef NO_MD5
+                , "md5"
+#endif
+#ifndef NO_SHA
+                , "sha"
+#endif
+#ifndef NO_SHA256
+                , "sha256"
+#endif
+#ifdef CYASSL_SHA384
+                , "sha384"
+#endif
+#ifdef CYASSL_SHA512
+                , "sha512"
+#endif
+#ifdef HAVE_BLAKE2
+                , "blake2b"
+#endif
+        };
+    printf("\nAvailable tests: (-a to test all)\n");
     printf("Available tests with current configure settings:\n");
-    for(i = 0; i < SZALGS2/SZFRST2; i++) {
+    for(i = 0; i < (int) sizeof(algsother)/(int) sizeof(algsother[0]); i++) {
         printf("%s\n", algsother[i]);
     }
     printf("\n");
+            /* encryption/decryption help lists options */
+    printf("***************************************************************\n");
+    printf("\nUSAGE: wolfssl -b [alg] -t [time in seconds [1-10]]\n");
+    printf("***************************************************************\n");
+    printf("\nEXAMPLE: \n\nwolfssl -b aes-cbc-128 -p Thi$i$myPa$$w0rd"
+           " -i encryptedfile.txt -o decryptedfile.txt\n\n");
 }
 
 /*
@@ -267,7 +412,7 @@ int wolfsslGenKey(RNG* rng, byte* pwdKey, int size, byte* salt, int pad)
         salt[0] = 0;
 
     /* stretches pwdKey */
-    ret = (int) PBKDF2(pwdKey, pwdKey, strlen((const char*)pwdKey), salt, SALT_SIZE, 
+    ret = (int) PBKDF2(pwdKey, pwdKey, (int) strlen((const char*)pwdKey), salt, SALT_SIZE, 
                                                             4096, size, SHA256);
     if (ret != 0)
         return ret;
@@ -349,7 +494,7 @@ double wolfsslGetTime(void)
 /* 
  * prints out stats for benchmarking
  */
-void wolfsslStats(double start, int blockSize)
+void wolfsslStats(double start, int blockSize, int64_t blocks)
 {
     int64_t compBlocks = blocks;
     double total = wolfsslGetTime() - start, mbs;
@@ -359,4 +504,10 @@ void wolfsslStats(double start, int blockSize)
 
     mbs = compBlocks * blockSize / MEGABYTE / total;
     printf("Average MB/s = %8.1f\n", mbs);
+}
+
+void wolfsslVersion() 
+{
+    printf("\nYou are using version %s of the wolfssl Command Line Utility.\n\n"
+        , LIBWOLFSSL_VERSION_STRING);
 }

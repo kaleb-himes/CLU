@@ -20,13 +20,11 @@
 
 #include "include/wolfssl.h"
 
-#define LENGTH_IN       (int)strlen(in)      /* type cast unsigned int to int */
-
 int wolfsslSetup(int argc, char** argv, char action)
 {
-    char     outNameE[256] = "encrypted"; /* default outFile for encrypt */
-    char     outNameD[256] = "decrypted"; /* default outfile for decrypt */
-    char     inName[256] = "wolfSSL Command Line Utility Default Input ";
+    char     outNameE[256];     /* default outFile for encrypt */
+    char     outNameD[256];     /* default outfile for decrypt */
+    char     inName[256];       /* name of the in File if not provided */
 
     char*    name = NULL;       /* string of algorithm, mode, keysize */
     char*    alg = NULL;        /* algorithm from name */
@@ -46,7 +44,6 @@ int wolfsslSetup(int argc, char** argv, char action)
     int      keyCheck   =   0;  /* if ivCheck is 1 this should be set also */
     int      inCheck    =   0;  /* if input has been provided */
     int      outCheck   =   0;  /* if output has been provided */
-    int      mark       =   0;  /* used for getting file extension of in */  
     int      i          =   0;  /* loop counter */
     int      eCheck     =   0;  /* if user is encrypting data */
     int      dCheck     =   0;  /* if user is decrypting data */
@@ -62,16 +59,17 @@ int wolfsslSetup(int argc, char** argv, char action)
     if (action == 'd')
         dCheck = 1;
 
-    /* help checking */
-    if (argc == 2) {
-        wolfsslHelp();
-        return 0;
-    }
-
     for (i = 2; i < argc; i++) {
         if (strcmp(argv[i], "-help") == 0) {
-            wolfsslHelp();
-            return 0;
+            if (eCheck == 1) {
+                /*wolfsslEncryptHelp*/
+                wolfsslEncryptHelp();
+                return 0;
+            } else {
+                /*wolfsslDecryptHelp*/
+                wolfsslDecryptHelp();
+                return 0;
+            }
         }
     }
 
@@ -198,17 +196,39 @@ int wolfsslSetup(int argc, char** argv, char action)
 
         }while(i < 15);
 
+        if (pwdKeyChk == 0 && keyCheck == 0) {
+            if (dCheck == 1) {
+                printf("\nDECRYPT ERROR:\n");
+                printf("Please type \"wolfssl -d -help\" for decryption usage."
+                                                                        "\n\n");
+                return 0;
+            }
+            /* if no pwdKey is provided */
+            else {
+                printf("No -p flag set, please enter a password to use for"
+                " encrypting.\n");
+                printf("Write your password down so you don't forget it.\n");
+                ret = wolfsslNoEcho((char*)pwdKey, size);
+                pwdKeyChk = 1;
+            }
+        }
+
         if (inCheck == 0 && eCheck == 1) {
+            ret = 0;
+            while (ret == 0) {
+                printf("-i flag was not set, please enter a string or\n"
+                       "file name to be encrypted: ");
+                ret = (int) scanf("%s", inName);
+            } 
             in = inName;
             /* if no input is provided */
-            printf("No input was provided, but do not worry! We will encrypt"
-                    " the string:\n\"%s\" for you.\n\n", inName);
+            printf("Ok,  We will encrypt:\"%s\" for you.\n", inName);
             inCheck = 1;
         }
 
         if (eCheck == 1 && dCheck == 1) {
-            printf("You want to encrypt and decrypt simultaneously? That does"
-                    "not make sense...\n");
+            printf("You want to encrypt and decrypt simultaneously? That is"
+                    "not possible...\n");
             wolfsslFreeBins(pwdKey, iv, key, NULL, NULL);
             return FATAL_ERROR;
         }
@@ -218,14 +238,6 @@ int wolfsslSetup(int argc, char** argv, char action)
                     "trying to decrypt.\n");
             wolfsslFreeBins(pwdKey, iv, key, NULL, NULL);
             return FATAL_ERROR;
-        }
-
-        if (pwdKeyChk == 0 && keyCheck == 0) {
-            /* if no pwdKey is provided */
-            printf("Please enter a custom pwdKey, or simply hit\n\"Enter\" to "
-                    "have a non-password iv generated for you\n");
-            ret = wolfsslNoEcho((char*)pwdKey, size);
-            pwdKeyChk = 1;
         }
 
         if (ivCheck == 1) {
@@ -246,16 +258,12 @@ int wolfsslSetup(int argc, char** argv, char action)
         if (eCheck == 1) {
             
             printf("\n");
-            if (outCheck == 0 && ret == 0) {
-                printf("No outfile was provided, "
-                        "but do not worry! We made one");
-                printf(" for you.\nLook for a file named: %s\n\n", outNameE);
-                /* gets file extension of input type */
-                for (i = 0; i < LENGTH_IN; i++) {
-                    if ((in[i] == '.') || (mark == 1)) {
-                        mark = 1;
-                        wolfsslAppend(out, in[i]);
-                    }
+            if (outCheck == 0) {
+                ret = 0;
+                while (ret == 0) {
+                    printf("Please enter a name for the output file: ");
+                    ret = (int) scanf("%s", outNameE);
+                    out = (ret > 0) ? outNameE : '\0';
                 }
             }
             ret = wolfsslEncrypt(alg, mode, pwdKey, key, size, in, out, 
@@ -263,17 +271,12 @@ int wolfsslSetup(int argc, char** argv, char action)
         }
         /* decryption function call */
         else if (dCheck == 1) {
-            if (outCheck == 0 && ret == 0) {
-                out = outNameD;
-                printf("No outfile was provided, "
-                        "but do not worry! We made one");
-                printf(" for you.\nLook for a file named: %s\n\n", outNameD);
-                /* gets file extension of input type */
-                for (i = 0; i < LENGTH_IN; i++) {
-                    if ((in[i] == '.') || (mark == 1)) {
-                        mark = 1;
-                        wolfsslAppend(out, in[i]);
-                    }
+            if (outCheck == 0) {
+                ret = 0;
+                while (ret == 0) {
+                    printf("Please enter a name for the output file: ");
+                    ret = (int) scanf("%s", outNameD);
+                    out = (ret > 0) ? outNameD : '\0';
                 }
             }
             ret = wolfsslDecrypt(alg, mode, pwdKey, key, size, in, out, 

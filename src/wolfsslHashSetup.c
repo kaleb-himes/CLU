@@ -20,9 +20,6 @@
 
 #include "include/wolfssl.h"
 
-#define SZALGS          (int) sizeof(algs)   /* type cast unsigned int to int */
-#define SZFRST          (int) sizeof(algs[0])/* type cast unsigned int to int */
-
 /*
  * hash argument function
  */
@@ -34,22 +31,22 @@ int wolfsslHashSetup(int argc, char** argv)
     char*   out     =   NULL;   /* output variable */
     const char* algs[]  =   {   /* list of acceptable algorithms */
 #ifndef NO_MD5
-        "-md5"
+        "md5"
 #endif
 #ifndef NO_SHA
-            , "-sha"
+            , "sha"
 #endif
 #ifndef NO_SHA256
-            , "-sha256"
+            , "sha256"
 #endif
 #ifdef CYASSL_SHA384
-            , "-sha384"
+            , "sha384"
 #endif
 #ifdef CYASSL_SHA512
-            , "-sha512"
+            , "sha512"
 #endif
 #ifdef HAVE_BLAKE2
-            , "-blake2b"
+            , "blake2b"
 #endif
     };
 
@@ -57,7 +54,6 @@ int wolfsslHashSetup(int argc, char** argv)
     int     algCheck=   0;      /* acceptable algorithm check */
     int     inCheck =   0;      /* input check */
     int     size    =   0;      /* message digest size */           
-    char*   len     =   NULL;   /* length to be hashed */
 
 #ifdef HAVE_BLAKE2
     size = BLAKE_DIGEST_SIZE;
@@ -65,17 +61,17 @@ int wolfsslHashSetup(int argc, char** argv)
 
     /* help checking */
     if (argc == 2) {
-        wolfsslHelp();
+        wolfsslHashHelp();
         return 0;
     }
     for (i = 2; i < argc; i++) {
         if (strcmp(argv[i], "-help") == 0) {
-            wolfsslHelp();
+            wolfsslHashHelp();
             return 0;
         }
     }
 
-    for (i = 0; i < SZALGS/SZFRST; i++) {
+    for (i = 0; i < (int) sizeof(algs)/(int) sizeof(algs[0]); i++) {
         /* checks for acceptable algorithms */
         if (strcmp(argv[2], algs[i]) == 0) {
             alg = argv[2];
@@ -114,53 +110,44 @@ int wolfsslHashSetup(int argc, char** argv)
 #endif
             i++;
         }
-        else if (strcmp(argv[i], "-l") == 0 && argv[i+1] != NULL) {
-            /* length of string to hash */
-            len = malloc(strlen(argv[i+1])+1);
-            strcpy(len, &argv[i+1][0]);
-            len[strlen(argv[i+1])] = '\0';
-            i++;
-        } 
         else {
             printf("Unknown argument %s. Ignoring\n", argv[i]);
         }
     }
     if (inCheck == 0) {
         printf("Must have input as either a file or standard I/O\n");
-        free(len);
         return FATAL_ERROR;
     }
     /* sets default size of algorithm */
 #ifndef NO_MD5
-    if (strcmp(alg, "-md5") == 0) 
+    if (strcmp(alg, "md5") == 0) 
         size = MD5_DIGEST_SIZE;
 #endif
 
 #ifndef NO_SHA
-    if (strcmp(alg, "-sha") == 0) 
+    if (strcmp(alg, "sha") == 0) 
         size = SHA_DIGEST_SIZE;
 #endif
 
 #ifndef NO_SHA256
-    if (strcmp(alg, "-sha256") == 0) 
+    if (strcmp(alg, "sha256") == 0) 
         size = SHA256_DIGEST_SIZE;
 #endif
 
 #ifdef CYASSL_SHA384
-    if (strcmp(alg, "-sha384") == 0)
+    if (strcmp(alg, "sha384") == 0)
         size = SHA384_DIGEST_SIZE;
 #endif
 
 #ifdef CYASSL_SHA512
-    if (strcmp(alg, "-sha512") == 0)
+    if (strcmp(alg, "sha512") == 0)
         size = SHA512_DIGEST_SIZE;
 #endif
 
     /* hashing function */
-    wolfsslHash(in, len, out, alg, size);
+    wolfsslHash(in, out, alg, size);
 
     free(in);
-    free(len);
 
     return ret;
 }

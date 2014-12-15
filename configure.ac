@@ -10,7 +10,7 @@
 #requires user to have AutoConf version 2.63 or greater.
 AC_PREREQ([2.63])
 
-AC_INIT([wolfssl], [0.1], [http://www.wolfssl.com])
+AC_INIT([wolfssl], [0.3], [http://www.wolfssl.com])
 
 #a helpful directory to keep clutter out of root
 AC_CONFIG_AUX_DIR([build-aux])
@@ -34,7 +34,7 @@ AC_DEFUN([PROTECT_AC_USE_SYSTEM_EXTENSIONS],
 AC_CONFIG_MACRO_DIR([m4])
 
 #shared library versioning
-WOLFSSL_LIBRARY_VERSION=1:0:0
+WOLFSSL_LIBRARY_VERSION=1:1:0
 #                       | | |
 #                +------+ | +---+
 #                |        |     |
@@ -43,10 +43,10 @@ WOLFSSL_LIBRARY_VERSION=1:0:0
 #                |        |     +- increment if interfaces have been added
 #                |        |        set to zero if interfaces have been removed
 #                |        |        or changed
-#				 |        |
+#				         |        |
 #                |        +- increment if source code has changed
 #                |           set to zero if current is incremented
-#	             |
+#	               |
 #                +- increment if interfaces have been added, removed or changed
 AC_SUBST([WOLFSSL_LIBRARY_VERSION])
 

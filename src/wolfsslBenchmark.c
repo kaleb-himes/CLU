@@ -47,8 +47,11 @@ int wolfsslBenchmark(int timer, int* option)
 
     RNG rng;                        /* random number generator */
 
-    int             ret = 0;        /* return variable */
+    int             ret  = 0;        /* return variable */
+    double          stop = 0.0;     /* stop breaks loop */
     double          start;          /* start time */
+    double          currTime;       /* current time*/
+    
 
     ALIGN16 byte*   plain;          /* plain text */
     ALIGN16 byte*   cipher;         /* cipher */
@@ -77,12 +80,18 @@ int wolfsslBenchmark(int timer, int* option)
         alarm(timer);
 
         AesSetKey(&aes, key, AES_BLOCK_SIZE, iv, AES_ENCRYPTION);
+
         while (loop) {
             AesCbcEncrypt(&aes, cipher, plain, AES_BLOCK_SIZE);
             blocks++;
+            currTime = wolfsslGetTime();
+            stop = currTime - start;
+            /* if stop >= timer, loop = 0 */
+            loop = (stop >= timer) ? 0 : 1;
         }
+        printf("\n");
         printf("AES-CBC ");
-        wolfsslStats(start, AES_BLOCK_SIZE);
+        wolfsslStats(start, AES_BLOCK_SIZE, blocks);
         memset(plain, 0, AES_BLOCK_SIZE);
         memset(cipher, 0, AES_BLOCK_SIZE);
         memset(key, 0, AES_BLOCK_SIZE);
@@ -115,9 +124,13 @@ int wolfsslBenchmark(int timer, int* option)
         while (loop) {
             AesCtrEncrypt(&aes, cipher, plain, AES_BLOCK_SIZE);
             blocks++;
+            currTime = wolfsslGetTime();
+            stop = currTime - start;
+            /* if stop >= timer, loop = 0 */
+            loop = (stop >= timer) ? 0 : 1;
         }
         printf("AES-CTR ");
-        wolfsslStats(start, AES_BLOCK_SIZE);
+        wolfsslStats(start, AES_BLOCK_SIZE, blocks);
         memset(plain, 0, AES_BLOCK_SIZE);
         memset(cipher, 0, AES_BLOCK_SIZE);
         memset(key, 0, AES_BLOCK_SIZE);
@@ -151,9 +164,13 @@ int wolfsslBenchmark(int timer, int* option)
         while (loop) {
             Des3_CbcEncrypt(&des3, cipher, plain, DES3_BLOCK_SIZE);
             blocks++;
+            currTime = wolfsslGetTime();
+            stop = currTime - start;
+            /* if stop >= timer, loop = 0 */
+            loop = (stop >= timer) ? 0 : 1;
         }
         printf("3DES ");
-        wolfsslStats(start, DES3_BLOCK_SIZE);
+        wolfsslStats(start, DES3_BLOCK_SIZE, blocks);
         memset(plain, 0, DES3_BLOCK_SIZE);
         memset(cipher, 0, DES3_BLOCK_SIZE);
         memset(key, 0, DES3_BLOCK_SIZE);
@@ -189,9 +206,13 @@ int wolfsslBenchmark(int timer, int* option)
         while (loop) {
             CamelliaCbcEncrypt(&camellia, cipher, plain, CAMELLIA_BLOCK_SIZE);
             blocks++;
+            currTime = wolfsslGetTime();
+            stop = currTime - start;
+            /* if stop >= timer, loop = 0 */
+            loop = (stop >= timer) ? 0 : 1;
         }
         printf("Camellia ");
-        wolfsslStats(start, CAMELLIA_BLOCK_SIZE);
+        wolfsslStats(start, CAMELLIA_BLOCK_SIZE, blocks);
         memset(plain, 0, CAMELLIA_BLOCK_SIZE);
         memset(cipher, 0, CAMELLIA_BLOCK_SIZE);
         memset(key, 0, CAMELLIA_BLOCK_SIZE);
@@ -205,7 +226,6 @@ int wolfsslBenchmark(int timer, int* option)
     }
     i++;
 #endif
-
 #ifndef NO_MD5
     /* md5 test */
     if (option[i] == 1) {
@@ -222,10 +242,14 @@ int wolfsslBenchmark(int timer, int* option)
         while (loop) {
             Md5Update(&md5, plain, MEGABYTE);
             blocks++;
+            currTime = wolfsslGetTime();
+            stop = currTime - start;
+            /* if stop >= timer, loop = 0 */
+            loop = (stop >= timer) ? 0 : 1;
         }
         Md5Final(&md5, digest);
         printf("MD5 ");
-        wolfsslStats(start, MEGABYTE);
+        wolfsslStats(start, MEGABYTE, blocks);
         memset(plain, 0, MEGABYTE);
         memset(digest, 0, MD5_DIGEST_SIZE);
         free(plain);
@@ -235,7 +259,6 @@ int wolfsslBenchmark(int timer, int* option)
     }
     i++;
 #endif
-
 #ifndef NO_SHA
     /* sha test */
     if (option[i] == 1) {
@@ -252,10 +275,14 @@ int wolfsslBenchmark(int timer, int* option)
         while (loop) {
             ShaUpdate(&sha, plain, MEGABYTE);
             blocks++;
+            currTime = wolfsslGetTime();
+            stop = currTime - start;
+            /* if stop >= timer, loop = 0 */
+            loop = (stop >= timer) ? 0 : 1;
         }
         ShaFinal(&sha, digest);
         printf("Sha ");
-        wolfsslStats(start, MEGABYTE);
+        wolfsslStats(start, MEGABYTE, blocks);
         memset(plain, 0, MEGABYTE);
         memset(digest, 0, SHA_DIGEST_SIZE);
         free(plain);
@@ -265,7 +292,6 @@ int wolfsslBenchmark(int timer, int* option)
     }
     i++;
 #endif
-
 #ifndef NO_SHA256
     /* sha256 test */
     if (option[i] == 1) {
@@ -282,10 +308,14 @@ int wolfsslBenchmark(int timer, int* option)
         while (loop) {
             Sha256Update(&sha256, plain, MEGABYTE);
             blocks++;
+            currTime = wolfsslGetTime();
+            stop = currTime - start;
+            /* if stop >= timer, loop = 0 */
+            loop = (stop >= timer) ? 0 : 1;
         }
         Sha256Final(&sha256, digest);
         printf("Sha256 ");
-        wolfsslStats(start, MEGABYTE);
+        wolfsslStats(start, MEGABYTE, blocks);
         memset(plain, 0, MEGABYTE);
         memset(digest, 0, SHA256_DIGEST_SIZE);
         free(plain);
@@ -296,7 +326,6 @@ int wolfsslBenchmark(int timer, int* option)
     }
     i++;
 #endif
-
 #ifdef CYASSL_SHA384
     /* sha384 test */
     if (option[i] == 1) {
@@ -313,10 +342,14 @@ int wolfsslBenchmark(int timer, int* option)
         while (loop) {
             Sha384Update(&sha384, plain, MEGABYTE);
             blocks++;
+            currTime = wolfsslGetTime();
+            stop = currTime - start;
+            /* if stop >= timer, loop = 0 */
+            loop = (stop >= timer) ? 0 : 1;
         }
         Sha384Final(&sha384, digest);
         printf("Sha384 ");
-        wolfsslStats(start, MEGABYTE);
+        wolfsslStats(start, MEGABYTE, blocks);
         memset(plain, 0, MEGABYTE);
         memset(digest, 0, SHA384_DIGEST_SIZE);
         free(plain);
@@ -326,7 +359,6 @@ int wolfsslBenchmark(int timer, int* option)
     }
     i++;
 #endif
-
 #ifdef CYASSL_SHA512
     /* sha512 test */
     if (option[i] == 1) {
@@ -343,10 +375,14 @@ int wolfsslBenchmark(int timer, int* option)
         while (loop) {
             Sha512Update(&sha512, plain, MEGABYTE);
             blocks++;
+            currTime = wolfsslGetTime();
+            stop = currTime - start;
+            /* if stop >= timer, loop = 0 */
+            loop = (stop >= timer) ? 0 : 1;
         }
         Sha512Final(&sha512, digest);
         printf("Sha512 ");
-        wolfsslStats(start, MEGABYTE);
+        wolfsslStats(start, MEGABYTE, blocks);
         memset(plain, 0, MEGABYTE);
         memset(digest, 0, SHA512_DIGEST_SIZE);
         free(plain);
@@ -356,7 +392,6 @@ int wolfsslBenchmark(int timer, int* option)
     }
     i++;
 #endif
-
 #ifdef HAVE_BLAKE2
     /* blake2b test */
     if (option[i] == 1) {
@@ -373,10 +408,14 @@ int wolfsslBenchmark(int timer, int* option)
         while (loop) {
             Blake2bUpdate(&b2b, plain, MEGABYTE);
             blocks++;
+            currTime = wolfsslGetTime();
+            stop = currTime - start;
+            /* if stop >= timer, loop = 0 */
+            loop = (stop >= timer) ? 0 : 1;
         }
         Blake2bFinal(&b2b, digest, BLAKE_DIGEST_SIZE);
         printf("Blake2b ");
-        wolfsslStats(start, MEGABYTE);
+        wolfsslStats(start, MEGABYTE, blocks);
         memset(plain, 0, MEGABYTE);
         memset(digest, 0, BLAKE_DIGEST_SIZE);
         free(plain);

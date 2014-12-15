@@ -28,6 +28,14 @@ DISTCLEANFILES+= aminclude.am
 ACLOCAL_AMFLAGS= -I m4
 
 EXTRA_DIST+= tests
+EXTRA_DIST+= manpages
+EXTRA_DIST+= README.md
+
+man_MANS+= manpages/wolfsslBenchmark.1
+man_MANS+= manpages/wolfsslDecrypt.1
+man_MANS+= manpages/wolfsslEncrypt.1
+man_MANS+= manpages/wolfsslHash.1
+man_MANS+= manpages/wolfsslMain.1
 
 include src/include.am
 include include/include.am
