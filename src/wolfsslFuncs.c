@@ -299,9 +299,10 @@ void wolfsslBenchHelp()
     printf("\n");
             /* encryption/decryption help lists options */
     printf("***************************************************************\n");
-    printf("\nUSAGE: wolfssl -b [alg] -t [time in seconds [1-10]]\n");
+    printf("USAGE: wolfssl -b [alg] -t [time in seconds [1-10]]\n"
+           "       or\n       wolfssl -b -t 10 -a (to test all)\n");
     printf("***************************************************************\n");
-    printf("\nEXAMPLE: \n\nwolfssl -b aes-cbc-128 -p Thi$i$myPa$$w0rd"
+    printf("\nEXAMPLE: \n\nwolfssl -b aes-cbc -t 10"
            " -i encryptedfile.txt -o decryptedfile.txt\n\n");
 }
 
@@ -499,7 +500,7 @@ void wolfsslStats(double start, int blockSize, int64_t blocks)
     int64_t compBlocks = blocks;
     double total = wolfsslGetTime() - start, mbs;
 
-    printf("took%6.3f seconds, blocks = %llu\n", total,
+    printf("took %6.3f seconds, blocks = %llu\n", total,
             (unsigned long long)compBlocks);
 
     mbs = compBlocks * blockSize / MEGABYTE / total;
