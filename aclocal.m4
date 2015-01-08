@@ -573,8 +573,7 @@ to "yes", and re-run configure.
 END
     AC_MSG_ERROR([Your 'rm' program is bad, sorry.])
   fi
-fi
-])
+fi])
 
 dnl Hook into '_AC_COMPILER_EXEEXT' early to learn its expansion.  Do not
 dnl add the conditional right here, as _AC_COMPILER_EXEEXT may be further
@@ -1151,22 +1150,11 @@ AC_SUBST([am__untar])
 m4_include([m4/ax_add_am_macro.m4])
 m4_include([m4/ax_am_jobserver.m4])
 m4_include([m4/ax_am_macros.m4])
-m4_include([m4/ax_append_compile_flags.m4])
-m4_include([m4/ax_append_flag.m4])
-m4_include([m4/ax_append_link_flags.m4])
 m4_include([m4/ax_append_to_file.m4])
-m4_include([m4/ax_check_compile_flag.m4])
-m4_include([m4/ax_check_library.m4])
-m4_include([m4/ax_check_link_flag.m4])
 m4_include([m4/ax_count_cpus.m4])
-m4_include([m4/ax_create_generic_config.m4])
-m4_include([m4/ax_debug.m4])
 m4_include([m4/ax_file_escapes.m4])
-m4_include([m4/ax_harden_compiler_flags.m4])
 m4_include([m4/ax_print_to_file.m4])
-m4_include([m4/ax_pthread.m4])
-m4_include([m4/ax_vcs_checkout.m4])
-m4_include([m4/have_cyassl.m4])
+m4_include([m4/have_wolfssl.m4])
 m4_include([m4/hexversion.m4])
 m4_include([m4/lib-ld.m4])
 m4_include([m4/lib-link.m4])
@@ -1177,4 +1165,3 @@ m4_include([m4/ltsugar.m4])
 m4_include([m4/ltversion.m4])
 m4_include([m4/lt~obsolete.m4])
 m4_include([m4/visibility.m4])
-m4_include([m4/wolfssl_darwin_clang.m4])

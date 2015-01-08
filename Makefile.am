@@ -45,7 +45,7 @@ include include/include.am
 TESTS += $(check_PROGRAMS)
 test: check
 
-DISTCLEANFILES+= wolfssl-config
+#DISTCLEANFILES+= wolfssl-config
 
 
 maintainer-clean-local:
@@ -73,14 +73,14 @@ maintainer-clean-local:
 	-rm -f @PACKAGE@-*.tar.gz
 	-rm -f @PACKAGE@-*.rpm
 
-install-exec-local:	install-generic-config
+#install-exec-local:	install-generic-config
 
-install-generic-config:
-	$(mkinstalldirs) $(DESTDIR)$(bindir)
-	$(INSTALL_SCRIPT) @GENERIC_CONFIG@ $(DESTDIR)$(bindir)
+#install-generic-config:
+#	$(mkinstalldirs) $(DESTDIR)$(bindir)
+#	$(INSTALL_SCRIPT) @GENERIC_CONFIG@ $(DESTDIR)$(bindir)
 
-uninstall-local:
-	-rm -f $(DESTDIR)$(bindir)/@GENERIC_CONFIG@
+#uninstall-local:
+#	-rm -f $(DESTDIR)$(bindir)/@GENERIC_CONFIG@
 
 merge-clean:
 	@find ./ | $(GREP) \.gcda | xargs rm -f

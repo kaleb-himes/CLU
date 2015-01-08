@@ -289,7 +289,6 @@ int wolfsslEncrypt(char* alg, char* mode, byte* pwdKey, byte* key, int size,
     memset(alg, 0, size);
     memset(mode, 0 , block);
     /* Use the cyassl free for rng */
-    printf("freeing RNG.\n");
     FreeRng(&rng);
     wolfsslFreeBins(input, output, NULL, NULL, NULL);
     return 0;

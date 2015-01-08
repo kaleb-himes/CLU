@@ -10,7 +10,7 @@
 #requires user to have AutoConf version 2.63 or greater.
 AC_PREREQ([2.63])
 
-AC_INIT([wolfssl], [0.3], [http://www.wolfssl.com])
+AC_INIT([wolfssl_clu], [0.3], [http://www.wolfssl.com])
 
 #a helpful directory to keep clutter out of root
 AC_CONFIG_AUX_DIR([build-aux])
@@ -32,23 +32,6 @@ AC_DEFUN([PROTECT_AC_USE_SYSTEM_EXTENSIONS],
 #PROTECT_AC_USE_SYSTEM_EXTENSIONS
 
 AC_CONFIG_MACRO_DIR([m4])
-
-#shared library versioning
-WOLFSSL_LIBRARY_VERSION=1:1:0
-#                       | | |
-#                +------+ | +---+
-#                |        |     |
-#             current:revision:age
-#                |        |     |
-#                |        |     +- increment if interfaces have been added
-#                |        |        set to zero if interfaces have been removed
-#                |        |        or changed
-#				         |        |
-#                |        +- increment if source code has changed
-#                |           set to zero if current is incremented
-#	               |
-#                +- increment if interfaces have been added, removed or changed
-AC_SUBST([WOLFSSL_LIBRARY_VERSION])
 
 #requires user to have LibTool version 2.2 or greater
 LT_PREREQ([2.2])
@@ -86,9 +69,8 @@ AC_FUNC_MALLOC
 AC_TYPE_INT64_T
 
 # Requirements
-TAO_REQUIRE_LIBCYASSL
+TAO_REQUIRE_LIBWOLFSSL
 
-DEBUG_CFLAGS="-g -DDEBUG -DDEBUG_WOLFSSL"
 # since we have autoconf available, we can use cyassl options header
 AM_CFLAGS="$AM_CFLAGS -DHAVE_CYASSL_OPTIONS"
 
@@ -98,39 +80,15 @@ USER_C_EXTRA_FLAGS="$C_EXTRA_FLAGS"
 CFLAGS=""
 
 ###############################################
-#											  #
-#     Need a genKey check 					  #
-#											  #
-#     Need aes-cbc-[128][192][256] check 	  #
-#     Need aes-ctr-[128][192][256] check 	  #
-#     Need 3des-cbc-[056][112][168] check 	  #
+#                                             #
+#     Need a genKey check                     #
+#                                             #
+#     Need aes-cbc-[128][192][256] check      #
+#     Need aes-ctr-[128][192][256] check      #
+#     Need 3des-cbc-[056][112][168] check     #
 #     Need Camellia-cbc-[128][192][256] check #
-#											  #
+#                                             #
 ###############################################
-
-# DEBUG
-AX_DEBUG
-AS_IF([test "$ax_enable_debug" = "yes"],
-      [AM_CFLAGS="$DEBUG_CFLAGS $AM_CFLAGS"],
-      [AM_CFLAGS="$AM_CFLAGS -DNDEBUG -O2"])
-
-# SINGLE THREADED
-AC_ARG_ENABLE([singlethreaded],
-    [  --enable-singlethreaded Enable wolfSSL single threaded (default: disabled)],
-    [ ENABLED_SINGLETHREADED=$enableval ],
-    [ ENABLED_SINGLETHREADED=no ])
-
-AS_IF([ test "x$ENABLED_SINGLETHREADED" = "xno" ],[
-       AX_PTHREAD([
-                   AC_DEFINE([HAVE_PTHREAD], [1], [Define if you have POSIX threads libraries and header files.])
-                   AM_CFLAGS="-DWOLFSSL_PTHREADS $AM_CFLAGS $PTHREAD_CFLAGS"
-                   LIBS="$LIBS $PTHREAD_LIBS"
-                   ],[
-                      ENABLED_SINGLETHREADED=yes
-                      ])
-       ])
-
-AS_IF([ test "x$ENABLED_SINGLETHREADED" = "xyes" ],[ AM_CFLAGS="-DSINGLE_THREADED $AM_CFLAGS" ])
 
 # Checks for typedefs, structures, and compiler characteristics.
 if test "$ac_cv_sizeof_long" = "8"; then
@@ -140,9 +98,6 @@ else
         AM_CFLAGS="$AM_CFLAGS -DSIZEOF_LONG_LONG=8"
     fi
 fi
-
-# HARDEN FLAGS
-AX_HARDEN_CC_COMPILER_FLAGS
 
 # add user C_EXTRA_FLAGS back
 CFLAGS="$CFLAGS $USER_C_EXTRA_FLAGS"
@@ -156,7 +111,7 @@ AC_SUBST([AM_LDFLAGS])
 AC_CONFIG_FILES([Makefile])
 AC_CONFIG_FILES([include/version.h])
 
-AX_CREATE_GENERIC_CONFIG
+#AX_CREATE_GENERIC_CONFIG
 AX_AM_JOBSERVER([yes])
 
 AC_OUTPUT()
