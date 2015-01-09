@@ -497,14 +497,18 @@ double wolfsslGetTime(void)
  */
 void wolfsslStats(double start, int blockSize, int64_t blocks)
 {
-    int64_t compBlocks = blocks;
-    double total = wolfsslGetTime() - start, mbs;
+    double mbs;
+    double time_total = wolfsslGetTime() - start;
 
-    printf("took %6.3f seconds, blocks = %llu\n", total,
-            (unsigned long long)compBlocks);
+    printf("took %6.3f seconds, blocks = %llu\n", time_total,
+            (unsigned long long)blocks);
 
-    mbs = compBlocks * blockSize / MEGABYTE / total;
+    mbs = ((blocks * blockSize) / MEGABYTE) / time_total;
     printf("Average MB/s = %8.1f\n", mbs);
+    if (blockSize != MEGABYTE)
+        printf("Block size of this algorithm is: %d.\n\n", blockSize);
+    else
+        printf("Benchmarked using 1 Megabyte at a time\n\n");
 }
 
 void wolfsslVersion() 
