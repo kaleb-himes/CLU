@@ -15,7 +15,7 @@ AC_DEFUN([_TAO_SEARCH_LIBWOLFSSL],[
     #include <wolfssl/ssl.h>
   ],[
     wolfSSL_Init();
-  ]) 
+  ])
 
   AM_CONDITIONAL(HAVE_LIBWOLFSSL, [test "x${ac_cv_libwolfssl}" = "xyes"])
 
