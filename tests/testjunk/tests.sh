@@ -32,19 +32,19 @@ function crypto() {
         KEY=$(cat /dev/urandom | tr -dc 'a-zA-Z0-9' | fold -w 10 | head -n 1)
         RANDF=$(cat /dev/urandom | tr -dc 'a-zA-Z0-9' | fold -w $SIZEF | head -n 1)
         RANDT=$(cat /dev/urandom | tr -dc 'a-zA-Z0-9' | fold -w $SIZET | head -n 1)
-    
+
         echo $RANDF  >> $IN
-            
+
         echo $CYASSL $ENC $1 size: $SIZEF bytes
         $CYASSL $ENC $1 -i $IN -o $OUT -p $KEY
         $CYASSL $DEC $1 -i $OUT -o $IN -p $KEY
         echo $CYASSL $ENC $1 -i $RANDT
         $CYASSL $ENC $1 -i $RANDT -o $OUT -p $KEY
         $CYASSL $DEC $1 -i $OUT -o $IN -p $KEY
-          
+
         rm $OUT
         rm $IN
-   
+
         let COUNTER-=1
         let SIZEF+=100
         let SIZET+=10
@@ -64,7 +64,7 @@ function hashing() {
         RANDF=$(cat /dev/urandom | tr -dc 'a-zA-Z0-9' | fold -w $SIZEF | head -n 1)
         RANDT=$(cat /dev/urandom | tr -dc 'a-zA-Z0-9' | fold -w $SIZET | head -n 1)
         echo $RANDF >> $IN
- 
+
         echo $CYASSL -h $1 size: $SIZEF bytes
         $CYASSL -h $1 -i $IN -o $OUT
         echo $CYASSL -h $1 -i $RANDT
@@ -72,7 +72,7 @@ function hashing() {
 
         rm $IN
         rm $OUT
-    
+
         let COUNTER-=1
         let SIZEF+=100
         let SIZET+=10

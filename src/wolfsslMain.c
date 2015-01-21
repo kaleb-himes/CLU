@@ -28,10 +28,10 @@ int main(int argc, char** argv)
         printf("Main Help.\n");
         wolfsslHelp();
     }
-    while ((option = getopt (argc, argv, "e:d:h:b:i:o:p:V:K:t:axv")) != -1)  { 
-        switch (option) 
+    while ((option = getopt (argc, argv, "e:d:h:b:i:o:p:V:K:t:axv")) != -1)  {
+        switch (option)
         {
-            /* User wants to encrypt data or file*/ 
+            /* User wants to encrypt data or file*/
             case 'e':
                 if (argc == 2) {
                     wolfsslEncryptHelp();
@@ -39,14 +39,14 @@ int main(int argc, char** argv)
                 }
                 ret = wolfsslSetup(argc, argv, 'e');
                 return 0;
-                /* User wants to decrypt some data or file */    
+                /* User wants to decrypt some data or file */
             case 'd':
                 ret = wolfsslSetup(argc, argv, 'd');
                 return 0;
                 /* User wants to hash some data/file */
             case 'h':
                 ret = wolfsslHashSetup(argc, argv);
-                return 0;  
+                return 0;
             case 'b':
                 ret = wolfsslBenchSetup(argc, argv);
                 return 0;

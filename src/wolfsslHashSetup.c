@@ -53,7 +53,7 @@ int wolfsslHashSetup(int argc, char** argv)
     char*   alg;                /* algorithm being used */
     int     algCheck=   0;      /* acceptable algorithm check */
     int     inCheck =   0;      /* input check */
-    int     size    =   0;      /* message digest size */           
+    int     size    =   0;      /* message digest size */
 
 #ifdef HAVE_BLAKE2
     size = BLAKE_DIGEST_SIZE;
@@ -87,7 +87,7 @@ int wolfsslHashSetup(int argc, char** argv)
         if (strcmp(argv[i], "-i") == 0 && argv[i+1] != NULL) {
             /* input file/text */
             in = malloc(strlen(argv[i+1])+1);
-            strcpy(in, &argv[i+1][0]);
+            XSTRNCPY(in, &argv[i+1][0], XSTRLEN(&argv[i+1][0]));
             in[strlen(argv[i+1])] = '\0';
             inCheck = 1;
             i++;
@@ -120,17 +120,17 @@ int wolfsslHashSetup(int argc, char** argv)
     }
     /* sets default size of algorithm */
 #ifndef NO_MD5
-    if (strcmp(alg, "md5") == 0) 
+    if (strcmp(alg, "md5") == 0)
         size = MD5_DIGEST_SIZE;
 #endif
 
 #ifndef NO_SHA
-    if (strcmp(alg, "sha") == 0) 
+    if (strcmp(alg, "sha") == 0)
         size = SHA_DIGEST_SIZE;
 #endif
 
 #ifndef NO_SHA256
-    if (strcmp(alg, "sha256") == 0) 
+    if (strcmp(alg, "sha256") == 0)
         size = SHA256_DIGEST_SIZE;
 #endif
 

@@ -108,19 +108,17 @@ int wolfsslSetup(int argc, char** argv, char action)
 
             else if (strcmp(argv[i], "-p") == 0 && argv[i+1] != NULL) {
                 /* password pwdKey */
-                memcpy(pwdKey, argv[i+1], size);
+                XMEMCPY(pwdKey, argv[i+1], size);
                 pwdKeyChk = 1;
                 keyType = 1;
                 i+=2;
                 continue;
-                 
             }
             else if (strcmp(argv[i], "-x") == 0) {
                 /* using hexidecimal format */
                 inputHex = 1;
                 i++;
                 continue;
-                 
             }
             else if (strcmp(argv[i], "-V") == 0 && argv[i+1] != NULL) {
                 /* iv for encryption */
@@ -133,21 +131,21 @@ int wolfsslSetup(int argc, char** argv, char action)
                  ivSize = block*2;
                 if (strlen(argv[i+1]) != ivSize) {
                     printf("Invalid IV. Must match algorithm block size.\n");
-                    printf("Invalid IV size was: %d.\n", 
+                    printf("Invalid IV size was: %d.\n",
                                                        (int) strlen(argv[i+1]));
                     printf("size of IV expected was: %d.\n", ivSize);
                     wolfsslFreeBins(pwdKey, iv, key, NULL, NULL);
-                    return FATAL_ERROR;                    
+                    return FATAL_ERROR;
                 }
                 else {
                     char ivString[strlen(argv[i+1])];
-                    strcpy(ivString, argv[i+1]);
+                    XSTRNCPY(ivString, argv[i+1], XSTRLEN(argv[i+1]));
                     ret = wolfsslHexToBin(ivString, &iv, &ivSize,
                                             NULL, NULL, NULL,
                                             NULL, NULL, NULL,
                                             NULL, NULL, NULL);
                     if (ret != 0) {
-                        printf("failed during conversion of IV, ret = %d\n", 
+                        printf("failed during conversion of IV, ret = %d\n",
                                                                            ret);
                         wolfsslFreeBins(pwdKey, iv, key, NULL, NULL);
                         return -1;
@@ -160,7 +158,7 @@ int wolfsslSetup(int argc, char** argv, char action)
             else if (strcmp(argv[i], "-K") == 0 && argv[i+1] != NULL) {
                 /* 2 characters = 1 byte. 1 byte = 8 bits
                  * number of characters / 2 = bytes
-                 * bytes * 8 = bits 
+                 * bytes * 8 = bits
                  */
                 numBits = (int) (strlen(argv[i+1]) / 2 ) * 8;
                 /* Key for encryption */
@@ -173,7 +171,7 @@ int wolfsslSetup(int argc, char** argv, char action)
                 }
                 else {
                     char keyString[strlen(argv[i+1])];
-                    strcpy(keyString, argv[i+1]);
+                    XSTRNCPY(keyString, argv[i+1], XSTRLEN(argv[i+1]));
                     ret = wolfsslHexToBin(keyString, &key, &numBits,
                                             NULL, NULL, NULL,
                                             NULL, NULL, NULL,
@@ -256,7 +254,7 @@ int wolfsslSetup(int argc, char** argv, char action)
 
         /* encryption function call */
         if (eCheck == 1) {
-            
+
             printf("\n");
             if (outCheck == 0) {
                 ret = 0;
@@ -266,7 +264,7 @@ int wolfsslSetup(int argc, char** argv, char action)
                     out = (ret > 0) ? outNameE : '\0';
                 }
             }
-            ret = wolfsslEncrypt(alg, mode, pwdKey, key, size, in, out, 
+            ret = wolfsslEncrypt(alg, mode, pwdKey, key, size, in, out,
                     iv, block, ivCheck, inputHex);
         }
         /* decryption function call */
@@ -279,7 +277,7 @@ int wolfsslSetup(int argc, char** argv, char action)
                     out = (ret > 0) ? outNameD : '\0';
                 }
             }
-            ret = wolfsslDecrypt(alg, mode, pwdKey, key, size, in, out, 
+            ret = wolfsslDecrypt(alg, mode, pwdKey, key, size, in, out,
                     iv, block, keyType);
         }
         else {

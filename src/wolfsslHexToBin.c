@@ -35,11 +35,11 @@
 /* free up to 5 binary buffers using cyassl abstraction layer */
 void wolfsslFreeBins(byte* b1, byte* b2, byte* b3, byte* b4, byte* b5)
 {
-   XFREE(b1, NULL, DYNAMIC_TYPE_TMP_BUFFER); 
-   XFREE(b2, NULL, DYNAMIC_TYPE_TMP_BUFFER); 
-   XFREE(b3, NULL, DYNAMIC_TYPE_TMP_BUFFER); 
-   XFREE(b4, NULL, DYNAMIC_TYPE_TMP_BUFFER); 
-   XFREE(b5, NULL, DYNAMIC_TYPE_TMP_BUFFER); 
+   XFREE(b1, NULL, DYNAMIC_TYPE_TMP_BUFFER);
+   XFREE(b2, NULL, DYNAMIC_TYPE_TMP_BUFFER);
+   XFREE(b3, NULL, DYNAMIC_TYPE_TMP_BUFFER);
+   XFREE(b4, NULL, DYNAMIC_TYPE_TMP_BUFFER);
+   XFREE(b5, NULL, DYNAMIC_TYPE_TMP_BUFFER);
 }
 
 
@@ -99,13 +99,13 @@ int wolfsslHexToBin(const char* h1, byte** b1, word32* b1Sz,
         *b4Sz = (int)XSTRLEN(h4) / 2;
         *b4   = XMALLOC(*b4Sz, NULL, DYNAMIC_TYPE_TMP_BUFFER);
         if (*b4 == NULL) {
-            wolfsslFreeBins(b1 ? *b1 : NULL,b2 ? *b2 : NULL,b3 ? *b3 : 
+            wolfsslFreeBins(b1 ? *b1 : NULL,b2 ? *b2 : NULL,b3 ? *b3 :
                                                                 NULL,NULL,NULL);
             return MEMORY_E;
         }
         ret = Base16_Decode((const byte*)h4, (int)XSTRLEN(h4), *b4, b4Sz);
         if (ret != 0) {
-            wolfsslFreeBins(b1 ? *b1 : NULL, b2 ? *b2 : NULL, b3 ? *b3 : NULL, 
+            wolfsslFreeBins(b1 ? *b1 : NULL, b2 ? *b2 : NULL, b3 ? *b3 : NULL,
                 *b4, NULL);
             return ret;
         }

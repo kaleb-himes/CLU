@@ -1,14 +1,14 @@
 /* wolfsslFuncs.c
  *
  * Copyright (C) 2006-2014 wolfSSL Inc.
- * This file is part of CyaSSL.
+ * This file is part of wolfSSL. (formerly known as CyaSSL)
  *
- * CyaSSL is free software; you can redistribute it and/or modify
+ * wolfSSL is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
  * (at your option) any later version.
  *
- * CyaSSL is distributed in the hope that it will be useful,
+ * wolfSSL is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
@@ -33,7 +33,7 @@
 int     loop       =   1;       /* benchmarking loop */
 int     i          =   0;       /* loop variable */
 
-/* 
+/*
  * generic help function
  */
  void wolfsslHelp()
@@ -67,7 +67,7 @@ int     i          =   0;       /* loop variable */
 
 /*
  * verbose help function
- */ 
+ */
 void wolfsslVerboseHelp()
 {
     printf("\nwolfssl Command Line Utility version %3.1f\n\n", VERSION);
@@ -127,7 +127,7 @@ void wolfsslVerboseHelp()
 #endif
         };
         wolfsslHelp();
-        
+
         printf("Available En/De crypt Algorithms with current configure "
             "settings.\n\n");
 #ifndef NO_AES
@@ -407,13 +407,13 @@ int wolfsslGenKey(RNG* rng, byte* pwdKey, int size, byte* salt, int pad)
         return ret;
 
     /* set first value of salt to let us know
-     * if message has padding or not 
+     * if message has padding or not
      */
     if (pad == 0)
         salt[0] = 0;
 
     /* stretches pwdKey */
-    ret = (int) PBKDF2(pwdKey, pwdKey, (int) strlen((const char*)pwdKey), salt, SALT_SIZE, 
+    ret = (int) PBKDF2(pwdKey, pwdKey, (int) strlen((const char*)pwdKey), salt, SALT_SIZE,
                                                             4096, size, SHA256);
     if (ret != 0)
         return ret;
@@ -445,12 +445,12 @@ int wolfsslNoEcho(char* pwdKey, int size)
     success = fgets(pwdKey, size, stdin);
     if (success == NULL) {
         /* User wants manual input to be encrypted
-         * Do Nothing 
+         * Do Nothing
          */
     }
 
     pwdKey[strlen(pwdKey) - 1] = 0;
-    
+
     /* restore terminal */
     ret = tcsetattr(fileno(stdin), TCSANOW, &oflags);
     if (ret != 0) {
@@ -461,7 +461,7 @@ int wolfsslNoEcho(char* pwdKey, int size)
 }
 
 /*
- * adds character to end of string 
+ * adds character to end of string
  */
 void wolfsslAppend(char* s, char c)
 {
@@ -492,7 +492,7 @@ double wolfsslGetTime(void)
     return (double)tv.tv_sec + (double)tv.tv_usec / 1000000;
 }
 
-/* 
+/*
  * prints out stats for benchmarking
  */
 void wolfsslStats(double start, int blockSize, int64_t blocks)
@@ -511,7 +511,7 @@ void wolfsslStats(double start, int blockSize, int64_t blocks)
         printf("Benchmarked using 1 Megabyte at a time\n\n");
 }
 
-void wolfsslVersion() 
+void wolfsslVersion()
 {
     printf("\nYou are using version %s of the wolfssl Command Line Utility.\n\n"
         , LIBWOLFSSL_VERSION_STRING);

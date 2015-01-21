@@ -23,7 +23,7 @@
 #define LENGTH_IN       (int)strlen(in)      /* type cast unsigned int to int */
 
 /*
- * hashing function 
+ * hashing function
  */
 int wolfsslHash(char* in, char* out, char* alg, int size)
 {
@@ -76,17 +76,17 @@ int wolfsslHash(char* in, char* out, char* alg, int size)
         fclose(inFile);
     }
     /* hashes using accepted algorithm */
-#ifndef NO_MD5    
+#ifndef NO_MD5
     if (strcmp(alg, "md5") == 0) {
         ret = Md5Hash(input, length, output);
     }
 #endif
-#ifndef NO_SHA  
+#ifndef NO_SHA
     else if (strcmp(alg, "sha") == 0) {
         ret = ShaHash(input, length, output);
     }
 #endif
-#ifndef NO_SHA256  
+#ifndef NO_SHA256
     else if (strcmp(alg, "sha256") == 0) {
         ret = Sha256Hash(input, length, output);
     }
@@ -102,7 +102,7 @@ int wolfsslHash(char* in, char* out, char* alg, int size)
     }
 #endif
 #ifdef HAVE_BLAKE2
-    else if (strcmp(alg, "blake2b") == 0) { 
+    else if (strcmp(alg, "blake2b") == 0) {
         ret = InitBlake2b(&hash, size);
         ret = Blake2bUpdate(&hash, input, length);
         ret = Blake2bFinal(&hash, output, size);

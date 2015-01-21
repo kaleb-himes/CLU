@@ -23,7 +23,7 @@
 #define SALT_SIZE       8
 #define MAX             1024
 
-int wolfsslEncrypt(char* alg, char* mode, byte* pwdKey, byte* key, int size, 
+int wolfsslEncrypt(char* alg, char* mode, byte* pwdKey, byte* key, int size,
         char* in, char* out, byte* iv, int block, int ivCheck, int inputHex)
 {
 #ifndef NO_AES
@@ -54,7 +54,7 @@ int wolfsslEncrypt(char* alg, char* mode, byte* pwdKey, byte* key, int size,
     int     padCounter      = 0;    /* number of padded bytes */
     int     i               = 0;    /* loop variable */
     int     hexRet          = 0;    /* hex -> bin return*/
-    
+
     word32  tempInputL      = 0;    /* temporary input Length */
     word32  tempMax         = MAX;  /* controls encryption amount */
 
@@ -71,7 +71,7 @@ int wolfsslEncrypt(char* alg, char* mode, byte* pwdKey, byte* key, int size,
         userInputBuffer = (char*) malloc(inputLength);
 
         /* writes the entered text to the input buffer */
-        memcpy(userInputBuffer, in, inputLength);
+        XMEMCPY(userInputBuffer, in, inputLength);
 
         /* open the file to write */
         tempInFile = fopen(in, "wb");
@@ -156,7 +156,7 @@ int wolfsslEncrypt(char* alg, char* mode, byte* pwdKey, byte* key, int size,
 
                 /* hex or ascii */
                 if (inputHex == 1) {
-                    hexRet = wolfsslHexToBin(inputString, &input, 
+                    hexRet = wolfsslHexToBin(inputString, &input,
                                                 &tempInputL,
                                                 NULL, NULL, NULL,
                                                 NULL, NULL, NULL,
@@ -174,7 +174,7 @@ int wolfsslEncrypt(char* alg, char* mode, byte* pwdKey, byte* key, int size,
                 }
                 /* adjust tempMax for less than 1kB encryption */
                 tempMax = ret + padCounter;
-            } 
+            }
             else { /* otherwise we got a file read error */
                 wolfsslFreeBins(input, output, NULL, NULL, NULL);
                 return FREAD_ERROR;
@@ -241,12 +241,12 @@ int wolfsslEncrypt(char* alg, char* mode, byte* pwdKey, byte* key, int size,
             }
         }
 #endif /* HAVE_CAMELLIA */
-        
+
         /* this method added for visual confirmation of nist test vectors,
-         * automated tests to come soon 
+         * automated tests to come soon
          */
 
-        /* something in the output buffer and using hex */     
+        /* something in the output buffer and using hex */
         if (output != NULL && inputHex == 1) {
             int tempi;
 
@@ -257,7 +257,7 @@ int wolfsslEncrypt(char* alg, char* mode, byte* pwdKey, byte* key, int size,
             }
             printf(" ]\n\n");
         } /* end visual confirmation */
-        
+
         /* Open the outFile in append mode */
         outFile = fopen(out, "ab");
         ret = (int) fwrite(output, 1, tempMax, outFile);
@@ -277,7 +277,7 @@ int wolfsslEncrypt(char* alg, char* mode, byte* pwdKey, byte* key, int size,
         if (length < 0)
             printf("length went past zero.\n");
         if (input != NULL)
-            memset(input, 0, tempMax); 
+            memset(input, 0, tempMax);
         if (output != NULL)
             memset(output, 0, tempMax);
     }
@@ -285,7 +285,7 @@ int wolfsslEncrypt(char* alg, char* mode, byte* pwdKey, byte* key, int size,
     /* closes the opened files and frees the memory */
     fclose(inFile);
     memset(key, 0, size);
-    memset(iv, 0 , block); 
+    memset(iv, 0 , block);
     memset(alg, 0, size);
     memset(mode, 0 , block);
     /* Use the cyassl free for rng */
