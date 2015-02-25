@@ -3,7 +3,5 @@
 #
 
 
-nobase_include_HEADERS+= \
-                         include/version.h \
-                         include/wolfssl.h
+nobase_include_HEADERS+=include/wolfssl.h
 
